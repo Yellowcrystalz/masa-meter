@@ -1,24 +1,11 @@
-from contextlib import contextmanager
-
 import discord
 from discord import Interaction, Member, app_commands
 from discord.ext import commands
 
 from bot.logger import app_logger
 
-from db.crud import *
-from db.database import SessionLocal
-from db.models import User, Report
-
-
-@contextmanager
-def get_session():
-    session = SessionLocal()
-
-    try:
-        yield session
-    finally:
-        session.close()
+from db.crud import increment_meter
+from db.database import get_session
 
 
 class MasaMeter(commands.Cog):
@@ -32,8 +19,11 @@ class MasaMeter(commands.Cog):
         self.logger.info("Masa-Meter is online!")
 
     @app_commands.command(name="increment", description="Increments the Masa Meter")
-    async def increment(self, interaction: Interaction, offender: Member):
-        print(interaction.user)
+    @app_commands.describe(speaker="Person who said Sushi Masa")
+    async def increment(self, interaction: Interaction, speaker: Member):
+        with get_session() as session:
+            increment_meter(session, speaker.name)
+        await interaction.response.send_message("Masa Meter has gone up!")
 
     @app_commands.command(name="leaderboard", description="Shows the Leaderboard")
     async def history(self, interaction: discord.Interaction):

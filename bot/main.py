@@ -1,10 +1,12 @@
 import asyncio
 
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 
 from config import DISCORD_TOKEN, COGS_DIR
 from bot.logger import app_logger
+from db.crud import get_meter
+from db.database import get_session
 
 
 intents = discord.Intents.default()
@@ -12,9 +14,21 @@ intents.message_content = True
 bot = commands.Bot(command_prefix="mm ", intents=intents)
 
 
+@tasks.loop(seconds=5)
+async def update_bot_status():
+    with get_session() as session:
+        count = get_meter(session)
+
+    await bot.change_presence(activity=discord.Activity(
+        type=discord.ActivityType.watching,
+        name=f"Sushi Masa Count: {count}"
+    ))
+
+
 @bot.event
 async def on_ready():
     app_logger.info("Masa-Meter is connected to Discord!")
+    update_bot_status.start()
 
     try:
         synced_commands = await bot.tree.sync()

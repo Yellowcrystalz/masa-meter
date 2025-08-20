@@ -1,52 +1,68 @@
-from sqlalchemy import DateTime
+from sqlalchemy import Result, func, select
 from sqlalchemy.orm import Session
 
-from db.models import User, Report
+from db.models import Speaker, MasaMention
 
 
-def get_user(session: Session, username: str) -> User:
-    return session.query(User).filter(User.username == username).first()
+def get_speaker(session: Session, username: str) -> Speaker:
+    return session.get(Speaker, username)
 
 
-def create_user(session: Session, username: str) -> User:
-    user = get_user(session, username)
+def create_speaker(session: Session, username: str) -> Speaker:
+    speaker = get_speaker(session, username)
 
-    if user:
-        return user
+    if speaker:
+        return speaker
 
-    user = User(username=username)
+    speaker = Speaker(username=username)
 
-    session.add(user)
+    session.add(speaker)
     session.commit()
-    session.refresh(user)
+    session.refresh(speaker)
 
-    return user
+    return speaker
 
 
-def delete_user(session: Session, username: str) -> User:
-    user = get_user(session, username)
+def delete_speaker(session: Session, username: str) -> Speaker:
+    speaker = get_speaker(session, username)
 
-    if user:
-        session.delete(user)
+    if speaker:
+        session.delete(speaker)
         session.commit()
 
-    return user
+    return speaker
 
 
-def increment_meter(session: Session, date: DateTime, reporter_username: str, offender_username: str) -> Report:
-    reporter = get_user(session, reporter_username)
-    offender = get_user(session, offender_username)
+def increment_meter(session: Session, username: str) -> MasaMention:
+    speaker = get_speaker(session, username)
 
-    if reporter is None:
-        reporter = create_user(session, reporter_username)
+    if speaker is None:
+        speaker = create_speaker(session, username)
 
-    if offender is None:
-        offender = create_user(session, offender_username)
+    mention = MasaMention(speaker=speaker)
 
-    report = Report(date=date, reporter=reporter, offender=offender)
-
-    session.add(report)
+    session.add(mention)
     session.commit()
-    session.refresh(report)
+    session.refresh(mention)
 
-    return report
+    return mention
+
+
+def get_meter(session: Session) -> int:
+    stmt = select(func.count(MasaMention.id))
+
+    result = session.scalar(stmt)
+    return result
+
+
+def get_leaderboard(session: Session) -> Result:
+    stmt = (
+        select(Speaker.username, func.count(MasaMention.id))
+        .join(MasaMention, Speaker.username == MasaMention.speaker_username)
+        .group_by(Speaker.username)
+        .order_by(func.count(MasaMention.id).desc())
+    )
+
+    results = session.execute(stmt)
+
+    return results
