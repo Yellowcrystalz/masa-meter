@@ -1,54 +1,49 @@
+import asyncio
+
 import discord
 from discord.ext import commands
 
-from dotenv import load_dotenv
-
-import asyncio
-import logging
-import os
+from config import DISCORD_TOKEN, COGS_DIR
+from bot.logger import app_logger
 
 
-load_dotenv(dotenv_path="../.env")
-token = os.getenv("DISCORD_TOKEN")
-
-handler = logging.FileHandler(filename="discord.log", encoding="utf-8", mode="w")
 intents = discord.Intents.default()
 intents.message_content = True
-
 bot = commands.Bot(command_prefix="mm ", intents=intents)
 
 
 @bot.event
 async def on_ready():
-    print("Ready!")
+    app_logger.info("Masa-Meter is connected to Discord!")
 
     try:
         synced_commands = await bot.tree.sync()
         if len(synced_commands) == 1:
-            print("Synced 1 command.")
+            app_logger.info("Synced 1 command.")
         else:
-            print(f"Synced {len(synced_commands)} commands.")
+            app_logger.info(f"Synced {len(synced_commands)} commands.")
     except Exception as e:
-        print("An error with syncing application commands has occured: ", e)
+        app_logger.exception("An error with syncing application commands has occured: %s", e)
 
 
 @bot.command()
 @commands.is_owner()
 async def shutdown(ctx):
+    app_logger.info("Masa-Meter is shutting down!")
     await ctx.send("shutting down!")
     await bot.close()
 
 
 async def load():
-    for filename in os.listdir('./cogs'):
-        if filename.endswith('.py'):
-            await bot.load_extension(f'cogs.{filename[:-3]}')
+    for file in COGS_DIR.iterdir():
+        if file.suffix == ".py" and file.stem != "__init__":
+            await bot.load_extension(f"bot.cogs.{file.stem}")
 
 
 async def main():
     async with bot:
         await load()
-        await bot.start(token, log_handler=handler, log_level=logging.DEBUG)
+        await bot.start(DISCORD_TOKEN)
 
 
 if __name__ == "__main__":
