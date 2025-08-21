@@ -4,7 +4,9 @@ from discord.ext import commands
 
 from bot.logger import app_logger
 
-from db.crud import increment_meter
+from bot.ui.leaderboard_ui import LeaderboardUI
+
+from db.crud import increment_meter, get_leaderboard
 from db.database import get_session
 
 
@@ -26,8 +28,11 @@ class MasaMeter(commands.Cog):
         await interaction.response.send_message("Masa Meter has gone up!")
 
     @app_commands.command(name="leaderboard", description="Shows the Leaderboard")
-    async def history(self, interaction: discord.Interaction):
-        await interaction.response.send_message("doesn't work yet")
+    async def leaderboard(self, interaction: discord.Interaction):
+        with get_session() as session:
+            results = get_leaderboard(session)
+        leaderboard_ui = LeaderboardUI(results)
+        await leaderboard_ui.start(interaction)
 
 
 async def setup(bot: commands.Bot):
