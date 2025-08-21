@@ -23,6 +23,9 @@ class LeaderboardUI(discord.ui.View):
         message = ""
 
         for i, (username, score) in enumerate(results, start=1):
+            if i > 5:
+                break
+
             message += f"{self.emoji_dict[i]} - {username} - **{score}**\n"
 
         return message
