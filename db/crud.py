@@ -55,6 +55,16 @@ def get_meter(session: Session) -> int:
     return result
 
 
+def get_history(session: Session) -> Result:
+    stmt = (
+        select(MasaMention.id, MasaMention.date, MasaMention.speaker_username)
+    )
+
+    results = session.execute(stmt)
+
+    return results
+
+
 def get_leaderboard(session: Session) -> Result:
     stmt = (
         select(Speaker.username, func.count(MasaMention.id))
