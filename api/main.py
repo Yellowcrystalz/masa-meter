@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
 from db.crud import (
     get_history as crud_get_history,
@@ -10,9 +11,10 @@ from db.database import get_session
 
 
 app = FastAPI()
+app.mount("/static", StaticFiles(directory="frontend", html=True), name="static")
 
 
-@app.get("/meter")
+@app.get("/api/meter")
 def get_meter() -> list:
     with get_session() as session:
         results = crud_get_meter(session)
@@ -20,7 +22,7 @@ def get_meter() -> list:
     return [{"meter": results}]
 
 
-@app.get("/history")
+@app.get("/api/history")
 def get_history() -> list:
     with get_session() as session:
         results = crud_get_history(session)
@@ -37,7 +39,7 @@ def get_history() -> list:
     return history
 
 
-@app.get("/leaderboard")
+@app.get("/api/leaderboard")
 def get_leaderboard() -> list:
     with get_session() as session:
         results = crud_get_leaderboard(session)

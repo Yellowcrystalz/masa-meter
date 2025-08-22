@@ -8,11 +8,12 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
 
+load_dotenv(BASE_DIR / ".env")
+
 # Database
 DATABASE_PATH = DATA_DIR / "masa_meter.db"
 
 # Discord Bot
-load_dotenv(BASE_DIR / ".env")
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 
 BOT_DIR = BASE_DIR / "bot"
