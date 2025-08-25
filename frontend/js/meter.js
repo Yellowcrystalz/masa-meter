@@ -16,4 +16,4 @@ function updateMeter() {
 }
 
 updateMeter();
-setInterval(updateMeter, 5000);
+// setInterval(updateMeter, 5000);
