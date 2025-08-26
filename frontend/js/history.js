@@ -40,3 +40,4 @@ function formatDate(dateString) {
 }
 
 updateHistory();
+setInterval(updateHistory, 300000);

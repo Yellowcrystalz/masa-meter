@@ -16,3 +16,4 @@ function updateMeter() {
 }
 
 updateMeter();
+setInterval(updateMeter, 300000);
