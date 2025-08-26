@@ -16,4 +16,3 @@ function updateMeter() {
 }
 
 updateMeter();
-// setInterval(updateMeter, 5000);

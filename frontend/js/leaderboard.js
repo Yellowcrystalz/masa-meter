@@ -29,4 +29,3 @@ function updateLeaderboard() {
 }
 
 updateLeaderboard();
-setInterval(updateLeaderboard, 5000);

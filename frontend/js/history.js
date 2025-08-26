@@ -16,7 +16,7 @@ function updateHistory() {
 
                 row.innerHTML = `
                     <td>${entry.id}</td>
-                    <td>${entry.date}</td>
+                    <td>${formatDate(entry.date)}</td>
                     <td>${entry.username}</td>
                 `;
 
@@ -26,5 +26,17 @@ function updateHistory() {
         .catch(error => console.error(error));
 }
 
+function formatDate(dateString) {
+    const date = new Date(dateString)
+    dateString = date.toLocaleString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit"
+    })
+
+    return dateString
+}
+
 updateHistory();
-setInterval(updateHistory, 5000);
