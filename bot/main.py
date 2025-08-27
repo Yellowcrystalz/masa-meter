@@ -1,4 +1,5 @@
 import asyncio
+import signal
 
 import discord
 from discord.ext import commands, tasks
@@ -54,7 +55,17 @@ async def load():
             await bot.load_extension(f"bot.cogs.{file.stem}")
 
 
+async def shutdown_signal():
+    app_logger.info("Masa-Meter is shutting down!")
+    await bot.close()
+
+
 async def main():
+    loop = asyncio.get_running_loop()
+
+    for sig in (signal.SIGINT, signal.SIGTERM):
+        loop.add_signal_handler(sig, lambda: asyncio.create_task(shutdown_signal()))
+
     async with bot:
         await load()
         await bot.start(DISCORD_TOKEN)

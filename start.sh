@@ -14,10 +14,7 @@ cleanup() {
     echo "Stopping bot and API..."
 
     kill -TERM "$BOT_PID" 2>/dev/null || true
-    kill -INT  "$BOT_PID" 2>/dev/null || true
-
     kill -TERM "$WEBAPP_PID" 2>/dev/null || true
-    kill -INT  "$WEBAPP_PID" 2>/dev/null || true
 
     wait "$BOT_PID" 2>/dev/null || true
     wait "$WEBAPP_PID" 2>/dev/null || true
