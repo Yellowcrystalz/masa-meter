@@ -8,3 +8,12 @@ services:
     ports:
       - "8080:8080"
     restart: always
+    volumes:
+      - ./data:/app/data
+
+  cloudflared:
+    image: cloudflare/cloudlfared:latest
+    command: tunnel --url http://app:8080
+    depend_on:
+      - app
+    network_mode: "service:app"
