@@ -15,6 +15,7 @@ DATABASE_PATH = DATA_DIR / "masa_meter.db"
 
 # Discord Bot
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
+TEST_TOKEN = os.getenv("TEST_TOKEN")        # For testing purposes
 
 BOT_DIR = BASE_DIR / "bot"
 COGS_DIR = BOT_DIR / "cogs"

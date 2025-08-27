@@ -4,11 +4,14 @@ import signal
 import discord
 from discord.ext import commands, tasks
 
-from config import DISCORD_TOKEN, COGS_DIR
-from bot.logger import app_logger
+from config import COGS_DIR
+from bot.utils.config_loader import get_token
+from bot.utils.logger import app_logger
 from db.crud import get_meter
 from db.database import get_session
 
+
+TOKEN = get_token()
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -68,7 +71,7 @@ async def main():
 
     async with bot:
         await load()
-        await bot.start(DISCORD_TOKEN)
+        await bot.start(TOKEN)
 
 
 if __name__ == "__main__":

@@ -2,15 +2,14 @@ import discord
 from discord import Interaction, Member, app_commands
 from discord.ext import commands
 
-from bot.logger import app_logger
-
 from bot.ui.leaderboard_ui import LeaderboardUI
+from bot.utils.logger import app_logger
 
 from db.crud import increment_meter, get_leaderboard
 from db.database import get_session
 
 
-class MasaMeter(commands.Cog):
+class TextHandler(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.logger = app_logger
@@ -36,4 +35,4 @@ class MasaMeter(commands.Cog):
 
 
 async def setup(bot: commands.Bot):
-    await bot.add_cog(MasaMeter(bot))
+    await bot.add_cog(TextHandler(bot))
