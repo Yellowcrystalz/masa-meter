@@ -12,7 +12,7 @@
   [![Cloudflare](https://img.shields.io/badge/Cloudflare-FF7800?style=flat&logo=cloudflare&logoColor=white)](https://www.cloudflare.com/)
 
 </div>
----
+
 ## Table of Contents
 - [Overview](#overview)
 - [Features](#features)
