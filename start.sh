@@ -12,11 +12,18 @@ WEBAPP_PID=$!
 
 cleanup() {
     echo "Stopping bot and API..."
-    [[ -n "$BOT_PID" ]] && kill "$BOT_PID" 2>/dev/null || true
-    [[ -n "$WEBAPP_PID" ]] && kill "$WEBAPP_PID" 2>/dev/null || true
-    exit 0
+
+    kill -TERM "$BOT_PID" 2>/dev/null || true
+    kill -INT  "$BOT_PID" 2>/dev/null || true
+
+    kill -TERM "$WEBAPP_PID" 2>/dev/null || true
+    kill -INT  "$WEBAPP_PID" 2>/dev/null || true
+
+    wait "$BOT_PID" 2>/dev/null || true
+    wait "$WEBAPP_PID" 2>/dev/null || true
+
+    echo "Exit Successful"
 }
 
 trap cleanup EXIT INT TERM
 wait -n $BOT_PID $WEBAPP_PID
-echo "Exit Successful"
