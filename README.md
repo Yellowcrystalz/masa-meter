@@ -1,4 +1,4 @@
--<div align= center>
+<div align= center>
 	<h1>Masa Meter [beta]</h1>
 
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
