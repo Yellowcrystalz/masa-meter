@@ -31,7 +31,7 @@ This project demonstrates modern full-stack development with Python, FastAPI, Di
 
 ## Features
 - Interactive Discord bot that tracks mentions of "Sushi Masa" (manual)
-- Web interfaction showing counter, history, and leaderboard
+- Web interface showing counter, history, and leaderboard
 - Lightweight SQLite3 database
 - Docker containerization and deployment
 - Cloudflare Tunneling for secure public access from personal Raspberry Pi
@@ -66,4 +66,4 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) for detai
 
 ## Contact
 - Justin Nguyen - justinnguyen0914@gmail.com
-- GitHub: https://github.com/Yellowcrystalz
+- GitHub - https://github.com/Yellowcrystalz
