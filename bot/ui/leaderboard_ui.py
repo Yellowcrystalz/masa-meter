@@ -1,8 +1,30 @@
-"""
-Leaderboard UI
+# MIT License
+#
+# Copyright (c) 2025 Justin Nguyen
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
-This module defines the LeaderboardUI, a Discord UI view that displays the Masa Meter leaderboard
-in an embed for the top 5 users.
+"""Render a Discord leaderboard UI with results from a SQLAlchemy query.
+
+Format the top five usernames and scores from a SQLAlchemy Result object into a
+Discord embed with medal emojis representing the place. Provide a Discord UI
+view that can show the leaderboard in response to an interaction.
 """
 
 import discord
@@ -11,56 +33,62 @@ from sqlalchemy import Result
 
 
 class LeaderboardUI(discord.ui.View):
-    """
-    A Discord UI view for display the Masa Meter leaderboard.
+    """Generates a Discord UI view containing a leaderboard of the top five
+        speakers with the most mentions.
 
-    - The top 5 users are displayed in embedded message.
+    Attributes:
+        emoji_dict:
+            A dict that maps the discord medal to its corresponding number.
+            Numbers 4 and 5 are mapped to the normal medal emoji
+        embed:
+            A Discord embed containing the contents of the leaderboard.
     """
 
     def __init__(self, results: Result):
-        """
-        Initialize the leaderboard view.
-
-        - Contains an embed attribute
-        - Contains a dict to store Discord medal emojis
+        """Initialize the leaderboard view.
 
         Args:
-            results (Result): A SQLAlchemy Result object containing the leaderboard
+            results:
+                A SQLAlchemy Result object containing the leaderboard
                 (username, score).
         """
 
         super().__init__()
 
         # Discord medal emojis stored in a dictionary
-        self.emoji_dict = {
+        self.emoji_dict: dict[int, str] = {
             1: ":first_place:",
             2: ":second_place:",
             3: ":third_place:",
             4: ":medal:",
             5: ":medal:"
         }
-        self.embed = discord.Embed(title="Masa Meter Leaderboard")
+
+        self.embed: discord.embed = discord.Embed(
+            title="Masa Meter Leaderboard"
+        )
+
         self.embed.add_field(
             name="",
             value=self.results_to_embed(results)
         )
 
     def results_to_embed(self, results: Result) -> str:
-        """
-        Convert leaderboard results into a formatted embed.
-
-        - Creates a formatted string for each entry.
-        - Combines the top 5 entries into one string.
+        """Convert top 5 leaderboard results into a formatted embed.
 
         Args:
-            results (Result): A SQLAlchemy Result object containing the leaderboard
+            results:
+                A SQLAlchemy Result object containing the leaderboard
                 (username, score).
 
         Returns:
-            str: A formatted string (embed) with up to the top 5 leaderboard entries.
+            A formatted string (embed) with up to the top 5 leaderboard entries.
         """
 
-        message = ""
+        message: str = ""
+
+        # We used string concatenation to build the embeded message by iterating
+        # through results.
 
         for i, (username, score) in enumerate(results, start=1):
             if i > 5:
@@ -71,13 +99,13 @@ class LeaderboardUI(discord.ui.View):
         return message
 
     async def start(self, interaction: discord.Interaction) -> None:
-        """
-        Sends the leaderboard as a response to an interaction.
-
-        - Sends the view and the embed to the user.
+        """Send the leaderboard as a response to an interaction.
 
         Args:
-            interaction (discord.Interaction): Discord command interaction.
+            interaction: A Discord command interaction.
+
+        Returns:
+            None
         """
 
         await interaction.response.send_message(
