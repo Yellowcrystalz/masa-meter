@@ -14,6 +14,7 @@ services:
   cloudflared:
     image: cloudflare/cloudflared:latest
     command: tunnel --url http://app:8080
+    container_name: cloudflared
     depends_on:
       - app
     network_mode: "service:app"
