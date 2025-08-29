@@ -35,8 +35,10 @@ Attributes:
 
 from contextlib import contextmanager
 
-from sqlalchemy import Engine, Session, create_engine
-from sqlalchemy.orm import DeclarativeMeta, declarative_base, sessionmaker
+from sqlalchemy import Engine, create_engine
+from sqlalchemy.orm import (
+    DeclarativeMeta, Session, declarative_base, sessionmaker
+)
 
 from config import DATABASE_PATH
 

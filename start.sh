@@ -3,7 +3,7 @@
 set -e
 
 echo "Starting Discord Bot"
-python -m bot.main &
+python -m bot.main --prod &
 BOT_PID=$!
 
 echo "Starting Web App"
