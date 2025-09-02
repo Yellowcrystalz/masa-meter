@@ -36,6 +36,8 @@ from discord.ext import commands
 
 from sqlalchemy import Result
 
+from bot.ui.help_ui import HelpUI
+from bot.ui.info_ui import InfoUI
 from bot.ui.leaderboard_ui import LeaderboardUI
 
 from db.crud import create_mention, get_leaderboard
@@ -91,8 +93,9 @@ class MessageHandler(commands.Cog):
 
         # Regex to search for numerous variations of "Sushi Masa" in a message.
         expr: str = (
-            r"\b[s$5z]+\s*[uv]+\s*[s$5z]+\s*[h#4]+\s*[i1!l]+"    # Sushi regex
-            r"\s*(m|nn)+\s*[a@4]+\s*[s$5z]+\s*[a@4]+(\b|$|\s*)"  # Masa regex
+            r"[s$5z]+[\s_-]*[uv]+[\s_-]*[s$5z]+[\s_-]*[h#4]+[\s_-]*[i1!l]+"
+            r"[\s\S]*"
+            r"m+[\s_-]*[a@4]+[\s_-]*[s$5z]+[\s_-]*[a@4]+"
         )
         pattern: re.Pattern = re.compile(expr, re.I)
 
@@ -102,6 +105,24 @@ class MessageHandler(commands.Cog):
 
             self.logger.info(f"{message.author.name} said Sushi Masa")
             await message.reply("Masa Meter has gone up!")
+
+    @app_commands.command(name="help", description="Shows Masa Meter commands")
+    async def help(self, interaction: Interaction):
+        """
+        """
+
+        help_ui: discord.ui.View = HelpUI()
+
+        await help_ui.start(interaction)
+
+    @app_commands.command(name="info", description="Shows info about the bot")
+    async def info(self, interaction: Interaction):
+        """
+        """
+
+        info_ui: discord.ui.View = InfoUI()
+
+        await info_ui.start(interaction)
 
     @app_commands.command(
         name="increment", description="Increments the Masa Meter"
