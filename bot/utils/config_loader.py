@@ -28,7 +28,7 @@ use the production token; otherwise, use the test token.
 """
 
 import argparse
-from config import DISCORD_TOKEN, TEST_TOKEN
+from config import DISCORD_BOT_TOKEN, TEST_BOT_TOKEN
 
 
 def get_token() -> str:
@@ -54,8 +54,8 @@ def get_token() -> str:
     args: argparse.Namespace = parser.parse_args()
 
     if args.prod:
-        token: str = DISCORD_TOKEN
+        token: str = DISCORD_BOT_TOKEN
     else:
-        token: str = TEST_TOKEN
+        token: str = TEST_BOT_TOKEN
 
     return token
