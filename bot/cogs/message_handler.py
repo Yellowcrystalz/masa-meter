@@ -38,7 +38,7 @@ from sqlalchemy import Result
 
 from bot.ui.leaderboard_ui import LeaderboardUI
 
-from db.crud import increment_meter, get_leaderboard
+from db.crud import create_mention, get_leaderboard
 from db.database import get_session
 
 
@@ -98,7 +98,7 @@ class MessageHandler(commands.Cog):
 
         if pattern.search(message.content):
             with get_session() as session:
-                increment_meter(session, message.author.name)
+                create_mention(session, message.author.name)
 
             self.logger.info(f"{message.author.name} said Sushi Masa")
             await message.reply("Masa Meter has gone up!")
@@ -124,7 +124,7 @@ class MessageHandler(commands.Cog):
         """
 
         with get_session() as session:
-            increment_meter(session, speaker.name)
+            create_mention(session, speaker.name)
 
         self.logger.info(f"{speaker.name} said Sushi Masa")
         await interaction.response.send_message("Masa Meter has gone up!")

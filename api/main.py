@@ -132,9 +132,8 @@ def get_history() -> list[dict]:
 
     history: list[dict] = []
 
-    for id, date, username in results:
+    for date, username in results:
         history.append({
-            "id": id,
             "date": date,
             "username": username
         })

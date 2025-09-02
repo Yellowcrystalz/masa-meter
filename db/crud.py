@@ -94,7 +94,7 @@ def delete_speaker(session: Session, username: str) -> Speaker:
     return speaker
 
 
-def increment_meter(session: Session, username: str) -> MasaMention:
+def create_mention(session: Session, username: str) -> MasaMention:
     """Create a MasaMention entry in the database.
 
     Creates a Speaker object/entry if the username was not in the database.
@@ -117,6 +117,26 @@ def increment_meter(session: Session, username: str) -> MasaMention:
     session.add(mention)
     session.commit()
     session.refresh(mention)
+
+    return mention
+
+
+def delete_mention(session: Session, mention_id: str) -> MasaMention:
+    """Delete MasaMention from the database.
+
+    Args:
+        session: A SQLAlchemy session with the database.
+        mention_id: The id of the MasaMention to be deleted.
+
+    Returns:
+        The MasaMention object that was deleted if it exits; otherwise None
+    """
+
+    mention: MasaMention = session.get(MasaMention, mention_id)
+
+    if mention:
+        session.delete(mention)
+        session.commit()
 
     return mention
 
@@ -150,7 +170,7 @@ def get_history(session: Session) -> Result:
     """
 
     stmt: Select = (
-        select(MasaMention.id, MasaMention.date, MasaMention.speaker_username)
+        select(MasaMention.date, MasaMention.speaker_username)
     )
 
     results: Result = session.execute(stmt)

@@ -33,16 +33,18 @@ function updateHistory() {
             const historyTable = document.querySelector(".history");
             historyTable.innerHTML = "";
 
+            count = 1;
             data.forEach(entry => {
                 const row = document.createElement("tr");
 
                 row.innerHTML = `
-                    <td>${entry.id}</td>
+                    <td>${count}</td>
                     <td>${formatDate(entry.date)}</td>
                     <td>${entry.username}</td>
                 `;
 
                 historyTable.appendChild(row);
+                count++;
             })
         })
         .catch(error => console.error(error));

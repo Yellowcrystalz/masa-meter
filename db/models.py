@@ -27,8 +27,9 @@ database.
 """
 
 from datetime import datetime, timezone
+import uuid
 
-from sqlalchemy import Column, Integer, ForeignKey, Sequence, String
+from sqlalchemy import Column, ForeignKey, String
 from sqlalchemy.orm import relationship
 
 from db.database import Base, engine
@@ -60,7 +61,7 @@ class MasaMention(Base):
     """
 
     __tablename__ = "masa_mentions"
-    id = Column(Integer, Sequence("user_id_seq"), primary_key=True)
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     date = Column(
         String, default=lambda: datetime.now(timezone.utc).isoformat()
     )
