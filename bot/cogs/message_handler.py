@@ -107,8 +107,14 @@ class MessageHandler(commands.Cog):
             await message.reply("Masa Meter has gone up!")
 
     @app_commands.command(name="help", description="Shows Masa Meter commands")
-    async def help(self, interaction: Interaction):
-        """
+    async def help(self, interaction: Interaction) -> None:
+        """Show all the avaiable bot slash commands.
+
+        Args:
+            interaction: Discord command interaction.
+
+        Returns:
+            None
         """
 
         help_ui: discord.ui.View = HelpUI()
@@ -116,8 +122,15 @@ class MessageHandler(commands.Cog):
         await help_ui.start(interaction)
 
     @app_commands.command(name="info", description="Shows info about the bot")
-    async def info(self, interaction: Interaction):
-        """
+    async def info(self, interaction: Interaction) -> None:
+        """Show information about the bot, including description and useful
+        links
+
+        Args:
+            interaction: Discord command interaction.
+
+        Returns:
+            None
         """
 
         info_ui: discord.ui.View = InfoUI()

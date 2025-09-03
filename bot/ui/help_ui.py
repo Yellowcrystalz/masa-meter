@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""
+"""Render a Discord help UI with bot application (slash) command information.
 """
 
 import discord
@@ -28,7 +28,11 @@ import discord
 
 class HelpUI(discord.ui.View):
     def __init__(self):
-        """
+        """Generate a Discord help UI containing information about all the bot's
+        application (slash) commands.
+
+        Attributes:
+            embed: A Discord embed containing command information.
         """
 
         super().__init__()
@@ -42,7 +46,13 @@ class HelpUI(discord.ui.View):
         )
 
     async def start(self, interaction: discord.Interaction) -> None:
-        """
+        """Send the leaderboard as a response to an interaction.
+
+        Args:
+            interaction: A Discord command interaction.
+
+        Returns:
+            None
         """
 
         await interaction.response.send_message(

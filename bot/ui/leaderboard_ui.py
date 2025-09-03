@@ -33,7 +33,7 @@ from sqlalchemy import Result
 
 
 class LeaderboardUI(discord.ui.View):
-    """Generates a Discord UI view containing a leaderboard of the top five
+    """Generate a Discord UI view containing a leaderboard of the top five
         speakers with the most mentions.
 
     Attributes:

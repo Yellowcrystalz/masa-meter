@@ -20,7 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""
+"""Render a Discord UI containing a description of the bot and hyperlinks to a
+web dashboard and GitHub repository.
 """
 
 import discord
@@ -28,23 +29,38 @@ import discord
 
 class InfoUI(discord.ui.View):
     def __init__(self):
-        """
+        """Generate a Discord info UI with a description of the bot and links to
+        the website and github repo.
+
+        Attributes:
+            embed: A Discord embed containing a bot description and links.
         """
 
         super().__init__()
 
-        self.embed: discord.embed = discord.Embed(title="Masa Meter Info")
-        self.embed.add_field(
-            name="Website",
-            value="[Click here](https://masameter.xyz/)"
+        self.embed: discord.embed = discord.Embed(
+            title="Masa Meter Info",
+            description=(
+                "Bot to track how many times my friends say \"Sushi Masa\""
+            )
         )
         self.embed.add_field(
-            name="Github",
-            value="[Click here](https://github.com/Yellowcrystalz/masa-meter)"
+            name="",
+            value=(
+                "[Website](https://masameter.xyz/)\n"
+                "[Github Repo](https://github.com/Yellowcrystalz/masa-meter)"
+            ),
+            inline=False
         )
 
     async def start(self, interaction: discord.Interaction) -> None:
-        """
+        """Send the leaderboard as a response to an interaction.
+
+        Args:
+            interaction: A Discord command interaction.
+
+        Returns:
+            None
         """
 
         await interaction.response.send_message(
