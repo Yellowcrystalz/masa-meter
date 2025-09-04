@@ -43,16 +43,12 @@ import discord
 from discord.ext import commands, tasks
 
 from config import COGS_DIR
-from bot.utils.config_loader import get_token
+
+from bot.utils.config_loader import BOT_TOKEN
 from bot.utils.logger import app_logger
 from db.crud import get_meter
 from db.database import get_session
 
-
-# Loads production token if -p, --prod, or --prodution is passed, otherwises
-# loads test token
-
-TOKEN: str = get_token()
 
 intents: discord.Intents = discord.Intents.default()
 intents.message_content = True
@@ -169,7 +165,7 @@ async def main() -> None:
 
     async with bot:
         await load()
-        await bot.start(TOKEN)
+        await bot.start(BOT_TOKEN)
 
 
 if __name__ == "__main__":

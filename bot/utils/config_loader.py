@@ -28,34 +28,25 @@ use the production token; otherwise, use the test token.
 """
 
 import argparse
+from enum import Enum
+
 from config import DISCORD_BOT_TOKEN, TEST_BOT_TOKEN
 
 
-def get_token() -> str:
-    """Retreive a Discord API based on command-line argument flags.
+class Mode(Enum):
+    DEV = "development"
+    PROD = "production"
 
-    Parse the command-line arguments to determine whether to run the bot
-    in production or testing mode. Return the corresponding Discord token.
 
-    Returns:
-        A Discord API token. Either the test or production token.
-    """
+parser: argparse.ArgumentParser = argparse.ArgumentParser()
+parser.add_argument(
+    "-p",
+    "--prod",
+    "--production",
+    action="store_true",
+    help="Run in production mode"
+)
+args: argparse.Namespace = parser.parse_args()
 
-    parser: argparse.ArgumentParser = argparse.ArgumentParser()
-
-    parser.add_argument(
-        "-p",
-        "--prod",
-        "--production",
-        action="store_true",
-        help="Run in production mode"
-    )
-
-    args: argparse.Namespace = parser.parse_args()
-
-    if args.prod:
-        token: str = DISCORD_BOT_TOKEN
-    else:
-        token: str = TEST_BOT_TOKEN
-
-    return token
+MODE: Mode = Mode.PROD if args.prod else Mode.DEV
+BOT_TOKEN: str = DISCORD_BOT_TOKEN if MODE == Mode.PROD else TEST_BOT_TOKEN
