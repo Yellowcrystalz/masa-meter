@@ -103,11 +103,11 @@ class VoiceHandler(commands.Cog):
         """
 
         if interaction.guild.voice_client:
-            await interaction.guild.voice_client.disconnect(force=True)
             await interaction.response.send_message(
                 f"Leaving {interaction.guild.voice_client.channel.name}!",
                 silent=True
             )
+            await interaction.guild.voice_client.disconnect(force=True)
         else:
             await interaction.response.send_message(
                 "Not currently in a voice channel", ephemeral=True
