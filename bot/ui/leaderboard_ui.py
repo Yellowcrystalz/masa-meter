@@ -110,5 +110,6 @@ class LeaderboardUI(discord.ui.View):
 
         await interaction.response.send_message(
             embed=self.embed,
-            view=self
+            view=self,
+            silent=True
         )

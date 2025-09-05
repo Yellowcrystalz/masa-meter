@@ -91,8 +91,6 @@ async def on_ready() -> None:
             app_logger.info("Synced 1 command.")
         else:
             app_logger.info(f"Synced {len(synced_commands)} commands.")
-
-        await bot.tree.sync()
     except Exception as e:
         app_logger.exception(
             "An error with syncing application commands has occured: %s",
