@@ -20,20 +20,27 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Load the correct Discord API token from the config file.
+"""Configure Discord bot's enviroment.
 
-Determine whether to run in production or testing mode based on command-line
-flags. If '-p', '--prod', or '--production' is passed when starting the bot,
-use the production token; otherwise, use the test token.
+Handle runtime mode selection and configures the Discord bot's token and guild
+scope. In development mode, test bot token is used and development server is
+scoped. In production mode, the actual bot token is used and production server
+is scoped.
 """
 
 import argparse
 from enum import Enum
 
-from config import DISCORD_BOT_TOKEN, TEST_BOT_TOKEN
+from discord import Object, app_commands
+
+from config import (
+    DISCORD_BOT_TOKEN, TEST_BOT_TOKEN, MAIN_GUILD_ID, DEV_GUILD_ID
+)
 
 
 class Mode(Enum):
+    """Enumeration for bot runtime modes."""
+
     DEV = "development"
     PROD = "production"
 
@@ -50,3 +57,30 @@ args: argparse.Namespace = parser.parse_args()
 
 MODE: Mode = Mode.PROD if args.prod else Mode.DEV
 BOT_TOKEN: str = DISCORD_BOT_TOKEN if MODE == Mode.PROD else TEST_BOT_TOKEN
+GUILD: Object = (
+    Object(id=MAIN_GUILD_ID) if MODE == Mode.PROD else Object(id=DEV_GUILD_ID)
+)
+
+
+def command_guild_scope(func):
+    """Set an application (slash) command's guild scope based on the current
+    mode.
+
+    This function is a decorator.
+
+    In development mode, the command is scoped to the development guild.
+    In production mode, the command is scoped to the main guild.
+
+    Args:
+        func (Callable): The command function to decorate.
+
+    Return:
+        Callable: The decorated function with the guild scope applied.
+    """
+
+    if MODE == Mode.DEV:
+        func = app_commands.guilds(DEV_GUILD_ID)(func)
+    elif MODE == Mode.PROD:
+        func = app_commands.guilds(MAIN_GUILD_ID)(func)
+
+    return func

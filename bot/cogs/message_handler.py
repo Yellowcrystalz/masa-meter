@@ -39,6 +39,7 @@ from sqlalchemy import Result
 from bot.ui.help_ui import HelpUI
 from bot.ui.info_ui import InfoUI
 from bot.ui.leaderboard_ui import LeaderboardUI
+from bot.utils.config_loader import command_guild_scope
 
 from db.crud import create_mention, get_leaderboard
 from db.database import get_session
@@ -106,6 +107,7 @@ class MessageHandler(commands.Cog):
             self.logger.info(f"{message.author.name} said Sushi Masa")
             await message.reply("Masa Meter has gone up!")
 
+    @command_guild_scope
     @app_commands.command(name="help", description="Shows Masa Meter commands")
     async def help(self, interaction: Interaction) -> None:
         """Show all the avaiable bot slash commands.
@@ -121,6 +123,7 @@ class MessageHandler(commands.Cog):
 
         await help_ui.start(interaction)
 
+    @command_guild_scope
     @app_commands.command(name="info", description="Shows info about the bot")
     async def info(self, interaction: Interaction) -> None:
         """Show information about the bot, including description and useful
@@ -137,6 +140,7 @@ class MessageHandler(commands.Cog):
 
         await info_ui.start(interaction)
 
+    @command_guild_scope
     @app_commands.command(
         name="increment", description="Increments the Masa Meter"
     )
@@ -163,6 +167,7 @@ class MessageHandler(commands.Cog):
         self.logger.info(f"{speaker.name} said Sushi Masa")
         await interaction.response.send_message("Masa Meter has gone up!")
 
+    @command_guild_scope
     @app_commands.command(
         name="leaderboard", description="Shows the Leaderboard"
     )

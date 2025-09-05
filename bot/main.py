@@ -44,7 +44,7 @@ from discord.ext import commands, tasks
 
 from config import COGS_DIR
 
-from bot.utils.config_loader import BOT_TOKEN
+from bot.utils.config_loader import BOT_TOKEN, GUILD
 from bot.utils.logger import app_logger
 from db.crud import get_meter
 from db.database import get_session
@@ -86,11 +86,13 @@ async def on_ready() -> None:
     update_bot_status.start()
 
     try:
-        synced_commands: list = await bot.tree.sync()
+        synced_commands: list = await bot.tree.sync(guild=GUILD)
         if len(synced_commands) == 1:
             app_logger.info("Synced 1 command.")
         else:
             app_logger.info(f"Synced {len(synced_commands)} commands.")
+
+        await bot.tree.sync()
     except Exception as e:
         app_logger.exception(
             "An error with syncing application commands has occured: %s",
@@ -101,7 +103,7 @@ async def on_ready() -> None:
 @bot.command()
 @commands.is_owner()
 async def shutdown(ctx: commands.Context) -> None:
-    """Shuts down the bot safely. (Owner-only command)
+    """Shut down the bot safely. (Owner-only command)
 
     Args:
         ctx (commands.Context): Context of the command invocation.
@@ -111,12 +113,40 @@ async def shutdown(ctx: commands.Context) -> None:
 
     Examples:
         mm shutdown
-
     """
 
     app_logger.info("Masa-Meter is shutting down!")
     await ctx.send("shutting down!")
     await bot.close()
+
+
+@bot.command()
+@commands.is_owner()
+async def reload(ctx: commands.Context) -> None:
+    """Reload the bot for changes. (Owner-only command)
+
+    Unload all cogs first, then call load function.
+
+    Args:
+        ctx (commands.Context): Context of the command invocation.
+
+    Returns:
+        None
+
+    Examples:
+        mm reload
+    """
+
+    try:
+        for ext in list(bot.extensions.keys()):
+            await bot.unload_extension(ext)
+
+        await load()
+        await ctx.send("Reloaded all cogs!")
+        app_logger.info("Reloaded all cogs!")
+    except Exception as e:
+        await ctx.send("Error reloading cogs!")
+        app_logger.exception("Error reloading cogs: %s", e)
 
 
 async def load() -> None:
