@@ -23,11 +23,15 @@
 """
 """
 
+import asyncio
 import logging
 
 from discord import Interaction, app_commands
-from discord.ext import commands
+from discord.ext import commands, songbird
 
+from config import JOIN_MP3_PATH, LEAVE_MP3_PATH
+
+from bot.utils.audio_loader import load_track
 from bot.utils.config_loader import command_guild_scope
 
 
@@ -47,6 +51,7 @@ class VoiceHandler(commands.Cog):
 
         self.bot: commands.Bot = bot
         self.logger: logging.Logger = logging.getLogger(__name__)
+        self.voice_client: songbird.SongbirdClient = None
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
@@ -79,10 +84,20 @@ class VoiceHandler(commands.Cog):
             return
 
         channel = interaction.user.voice.channel
+
+        # Discord-ext-songbird does not have a graceful way to switch voice
+        # channels so the bot leaves its current voice channel and joins the new
+        # one
+
         if interaction.guild.voice_client:
-            await interaction.guild.voice_client.move_to(channel)
-        else:
-            await channel.connect()
+            await interaction.guild.voice_client.disconnect(force=True)
+
+            # Allows Discord to clean up previous handshake
+
+            await asyncio.sleep(.1)
+
+        self.voice_client = await channel.connect(cls=songbird.SongbirdClient)
+        await self.voice_client.queue.enqueue(load_track(JOIN_MP3_PATH, 0.25))
 
         await interaction.response.send_message(
             f"Joined {channel.name}!", silent=True
@@ -107,6 +122,10 @@ class VoiceHandler(commands.Cog):
                 f"Leaving {interaction.guild.voice_client.channel.name}!",
                 silent=True
             )
+            await self.voice_client.queue.enqueue(
+                load_track(LEAVE_MP3_PATH, 0.25)
+            )
+            await asyncio.sleep(1)
             await interaction.guild.voice_client.disconnect(force=True)
         else:
             await interaction.response.send_message(

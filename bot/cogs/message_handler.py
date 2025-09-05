@@ -164,7 +164,9 @@ class MessageHandler(commands.Cog):
             create_mention(session, speaker.name)
 
         self.logger.info(f"{speaker.name} said Sushi Masa")
-        await interaction.response.send_message("Masa Meter has gone up!")
+        await interaction.response.send_message(
+            "Masa Meter has gone up!", silent=True
+        )
 
     @command_guild_scope
     @app_commands.command(

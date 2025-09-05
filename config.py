@@ -50,9 +50,14 @@ DEV_GUILD_ID = int(os.getenv("DEV_GUILD_ID"))
 
 BOT_DIR = BASE_DIR / "bot"
 COGS_DIR = BOT_DIR / "cogs"
+ASSETS_DIR = BOT_DIR / "assets"
+AUDIO_DIR = ASSETS_DIR / "audio"
 
 APP_LOG_PATH = DATA_DIR / "application.log"
 DISCORD_LOG_PATH = DATA_DIR / "discord.log"
+
+JOIN_MP3_PATH = AUDIO_DIR / "join.mp3"
+LEAVE_MP3_PATH = AUDIO_DIR / "leave.mp3"
 
 # Frontend
 FRONTEND_DIR = BASE_DIR / "frontend"
