@@ -34,7 +34,7 @@ from sqlalchemy.orm import Session
 from db.models import Speaker, MasaMention
 
 
-def check_speaker(session: Session, username: str) -> Speaker:
+def check_speaker(session: Session, username: str) -> Speaker | None:
     """Check if speaker's usesrname exists in the database.
 
     Args:
@@ -74,7 +74,7 @@ def create_speaker(session: Session, username: str) -> Speaker:
     return speaker
 
 
-def delete_speaker(session: Session, username: str) -> Speaker:
+def delete_speaker(session: Session, username: str) -> Speaker | None:
     """Delete Speaker from the database.
 
     Args:
@@ -121,7 +121,7 @@ def create_mention(session: Session, username: str) -> MasaMention:
     return mention
 
 
-def delete_mention(session: Session, mention_id: str) -> MasaMention:
+def delete_mention(session: Session, mention_id: str) -> MasaMention | None:
     """Delete MasaMention from the database.
 
     Args:

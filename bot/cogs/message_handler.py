@@ -46,7 +46,7 @@ from db.database import get_session
 
 
 class MessageHandler(commands.Cog):
-    """Responsible for handling chat messages and commands related to the
+    """Handele chat messages and commands related to the
         application.
 
     Attributes:
@@ -54,8 +54,7 @@ class MessageHandler(commands.Cog):
     """
 
     def __init__(self, bot: commands.Bot):
-        """
-        Initialize the MessageHandler cog.
+        """Initialize the MessageHandler cog.
 
         Args:
             bot : Defines the Discord bot instance this cog is attached to.
@@ -165,11 +164,13 @@ class MessageHandler(commands.Cog):
             create_mention(session, speaker.name)
 
         self.logger.info(f"{speaker.name} said Sushi Masa")
-        await interaction.response.send_message("Masa Meter has gone up!")
+        await interaction.response.send_message(
+            "Masa Meter has gone up!", silent=True
+        )
 
     @command_guild_scope
     @app_commands.command(
-        name="leaderboard", description="Shows the Leaderboard"
+        name="leaderboard", description="Shows the leaderboard"
     )
     async def leaderboard(self, interaction: Interaction) -> None:
         """Display the Masa Meter leaderboard.
@@ -196,7 +197,7 @@ class MessageHandler(commands.Cog):
 
 
 async def setup(bot: commands.Bot) -> None:
-    """Loads the MessageHandler cog into the bot.
+    """Load the VoiceHandler cog into the bot.
 
     Args:
         bot (commands.Bot): The bot instance this cog is attached to.

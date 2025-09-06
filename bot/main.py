@@ -52,12 +52,13 @@ from db.database import get_session
 
 intents: discord.Intents = discord.Intents.default()
 intents.message_content = True
+intents.voice_states = True
 bot: commands.Bot = commands.Bot(command_prefix="mm ", intents=intents)
 
 
 @tasks.loop(seconds=5)
 async def update_bot_status() -> None:
-    """ Update the bot's Discord status with the current Sushi Masa Meter
+    """Update the bot's Discord status with the current Sushi Masa Meter
 
     Returns:
         None
@@ -91,8 +92,6 @@ async def on_ready() -> None:
             app_logger.info("Synced 1 command.")
         else:
             app_logger.info(f"Synced {len(synced_commands)} commands.")
-
-        await bot.tree.sync()
     except Exception as e:
         app_logger.exception(
             "An error with syncing application commands has occured: %s",

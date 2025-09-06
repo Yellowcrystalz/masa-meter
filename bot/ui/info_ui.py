@@ -65,5 +65,6 @@ class InfoUI(discord.ui.View):
 
         await interaction.response.send_message(
             embed=self.embed,
+            silent=True,
             view=self
         )
