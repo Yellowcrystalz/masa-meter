@@ -98,6 +98,7 @@ class MessageHandler(commands.Cog):
             r"[s$5z]+[\s_-]*[uv]+[\s_-]*[s$5z]+[\s_-]*[h#4]+[\s_-]*[i1!l]+"
             r"[\s\S]*"
             r"m+[\s_-]*[a@4]+[\s_-]*[s$5z]+[\s_-]*[a@4]+"
+            r"|m+[\s_-]*[a@4]+[\s_-]*[s$5z]+[\s_-]*[a@4]+"
         )
         pattern: re.Pattern = re.compile(expr, re.I)
 
