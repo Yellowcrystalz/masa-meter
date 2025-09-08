@@ -60,7 +60,7 @@ class MasaBot(discord.Bot):
         """
 
         app_logger.info("Masa Meter is connected to Discord!")
-        await self.update_bot_status()
+        self.update_bot_status.start()
         app_logger.info("Masa Meter is ready!")
         print("Ready")
 
