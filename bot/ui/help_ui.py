@@ -24,6 +24,7 @@
 """
 
 import discord
+from discord import ApplicationContext
 
 
 class HelpUI(discord.ui.View):
@@ -45,7 +46,7 @@ class HelpUI(discord.ui.View):
             name="/leaderboard", value="Show the Masa Meter leaderboard"
         )
 
-    async def start(self, interaction: discord.Interaction) -> None:
+    async def start(self, ctx: ApplicationContext) -> None:
         """Send the leaderboard as a response to an interaction.
 
         Args:
@@ -55,8 +56,7 @@ class HelpUI(discord.ui.View):
             None
         """
 
-        await interaction.response.send_message(
+        await ctx.respond(
             embed=self.embed,
-            silent=True,
-            view=self,
+            view=self
         )

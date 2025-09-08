@@ -20,15 +20,24 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""
+"""Handle voice related functionality for the Discord bot.
+
+Provide slash commands for joining and leaving the user's current voice channel.
+Play a join and leave sound clip.
 """
 
 import logging
 
-from discord import Interaction, app_commands
+from discord import (
+    ApplicationContext, FFmpegPCMAudio, PCMVolumeTransformer, VoiceClient,
+    slash_command
+)
 from discord.ext import commands
 
-from bot.utils.config_loader import command_guild_scope
+from config import JOIN_MP3_PATH, LEAVE_MP3_PATH
+
+from bot.main import MasaBot
+from bot.utils.config_loader import GUILD_ID_LIST
 
 
 class VoiceHandler(commands.Cog):
@@ -36,16 +45,17 @@ class VoiceHandler(commands.Cog):
 
     Attributes:
         bot: The Discord bot instance this cog is attached to.
+        logger: Logger object that logs events from this cog.
     """
 
-    def __init__(self, bot: commands.bot):
+    def __init__(self, bot: MasaBot):
         """Initialize the VoiceHandler cog.
 
         Args:
             bot : Defines the Discord bot instance this cog is attached to.
         """
 
-        self.bot: commands.Bot = bot
+        self.bot: MasaBot = bot
         self.logger: logging.Logger = logging.getLogger(__name__)
 
     @commands.Cog.listener()
@@ -58,11 +68,12 @@ class VoiceHandler(commands.Cog):
 
         self.logger.info("Voice handler is online!")
 
-    @command_guild_scope
-    @app_commands.command(
-        name="join", description="Bot joins current voice channel"
+    @slash_command(
+        name="join",
+        description="Bot joins current voice channel",
+        guild_ids=GUILD_ID_LIST
     )
-    async def join(self, interaction: Interaction) -> None:
+    async def join(self, ctx: ApplicationContext) -> None:
         """Join the voice channel of the interaction user if the user is
             currently in a voice channel.
 
@@ -72,27 +83,36 @@ class VoiceHandler(commands.Cog):
         Returns:
             None
         """
-        if interaction.user.voice is None:
-            await interaction.response.send_message(
+        if ctx.author.voice is None:
+            await ctx.respond(
                 "You are not in a voice channel!", ephemeral=True
             )
             return
 
-        channel = interaction.user.voice.channel
-        if interaction.guild.voice_client:
-            await interaction.guild.voice_client.move_to(channel)
-        else:
-            await channel.connect()
+        channel = ctx.author.voice.channel
+        voice_client: VoiceClient = ctx.voice_client
 
-        await interaction.response.send_message(
-            f"Joined {channel.name}!", silent=True
+        if voice_client:
+            await voice_client.disconnect(force=True)
+
+        voice_client = await channel.connect()
+
+        source = PCMVolumeTransformer(
+            FFmpegPCMAudio(JOIN_MP3_PATH)
+        )
+        voice_client.play(
+            source,
+            after=lambda e: print(f"Player error: {e}") if e else None
         )
 
-    @command_guild_scope
-    @app_commands.command(
-        name="leave", description="Bot leaves current voice channel"
+        await ctx.respond(f"Joined {channel.name}!")
+
+    @slash_command(
+        name="leave",
+        description="Bot leaves current voice channel",
+        guild_ids=GUILD_ID_LIST
     )
-    async def leave(self, interaction: Interaction) -> None:
+    async def leave(self, ctx: ApplicationContext) -> None:
         """Disconnect the bot from the current voice channel if in one.
 
         Args:
@@ -102,19 +122,39 @@ class VoiceHandler(commands.Cog):
             None
         """
 
-        if interaction.guild.voice_client:
-            await interaction.response.send_message(
-                f"Leaving {interaction.guild.voice_client.channel.name}!",
-                silent=True
+        voice_client: VoiceClient = ctx.voice_client
+
+        if voice_client:
+            await ctx.respond(f"Leaving {voice_client.channel.name}!")
+
+            source = PCMVolumeTransformer(
+                FFmpegPCMAudio(LEAVE_MP3_PATH)
             )
-            await interaction.guild.voice_client.disconnect(force=True)
+            await voice_client.play(
+                source=source,
+                after=lambda e: print(f"Player error: {e}") if e else None,
+                wait_finish=True
+            )
+
+            await voice_client.disconnect(force=False)
         else:
-            await interaction.response.send_message(
+            await ctx.respond(
                 "Not currently in a voice channel", ephemeral=True
             )
 
+    @join.before_invoke
+    @leave.before_invoke
+    async def ensure_voice(self, ctx: ApplicationContext):
+        """
+        """
 
-async def setup(bot: commands.Bot) -> None:
+        vc = ctx.voice_client
+
+        if vc is not None and vc.is_playing():
+            ctx.voice_client.stop()
+
+
+def setup(bot: commands.Bot) -> None:
     """Load the VoiceHandler cog into the bot.
 
     Args:
@@ -124,4 +164,4 @@ async def setup(bot: commands.Bot) -> None:
         None
     """
 
-    await bot.add_cog(VoiceHandler(bot))
+    bot.add_cog(VoiceHandler(bot))

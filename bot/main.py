@@ -40,146 +40,129 @@ import asyncio
 import signal
 
 import discord
-from discord.ext import commands, tasks
+from discord.ext import tasks
 
 from config import COGS_DIR
 
-from bot.utils.config_loader import BOT_TOKEN, GUILD
+from bot.utils.config_loader import BOT_TOKEN
 from bot.utils.logger import app_logger
+
 from db.crud import get_meter
 from db.database import get_session
 
 
-intents: discord.Intents = discord.Intents.default()
-intents.message_content = True
-intents.voice_states = True
-bot: commands.Bot = commands.Bot(command_prefix="mm ", intents=intents)
+class MasaBot(discord.Bot):
+    async def on_ready(self) -> None:
+        """Set up bot when the bot is ready and connected to Discord.
 
+        Returns:
+            None
+        """
 
-@tasks.loop(seconds=5)
-async def update_bot_status() -> None:
-    """Update the bot's Discord status with the current Sushi Masa Meter
+        app_logger.info("Masa Meter is connected to Discord!")
+        await self.update_bot_status()
+        app_logger.info("Masa Meter is ready!")
+        print("Ready")
 
-    Returns:
-        None
-    """
+    async def close(self) -> None:
+        """Close the connection to Discord.
 
-    # Polling every 5 seconds to avoid complex event-driven logic.
+        Use Pycord 2.6.1 implementaion of close() since Pycord 2.7.x throws an
+        error.
 
-    with get_session() as session:
-        meter: int = get_meter(session)
+        Returns:
+            None
+        """
+        if self._closed:
+            return
 
-    await bot.change_presence(activity=discord.Activity(
-        type=discord.ActivityType.watching,
-        name=f"Sushi Masa Meter: {meter}"
-    ))
+        self._closed = True
 
+        for voice in self.voice_clients:
+            try:
+                await voice.disconnect(force=True)
+            except Exception:
+                # if an error happens during disconnects, disregard it.
+                pass
 
-@bot.event
-async def on_ready() -> None:
-    """Log bot connection and start the background status update task.
+        if self.ws is not None and self.ws.open:
+            await self.ws.close(code=1000)
 
-    Returns:
-        None
-    """
+        await self.http.close()
+        self._ready.clear()
 
-    app_logger.info("Masa-Meter is connected to Discord!")
-    update_bot_status.start()
+    async def shutdown(self) -> None:
+        """Shut down the bot "safely" and logs it.
 
-    try:
-        synced_commands: list = await bot.tree.sync(guild=GUILD)
-        if len(synced_commands) == 1:
-            app_logger.info("Synced 1 command.")
-        else:
-            app_logger.info(f"Synced {len(synced_commands)} commands.")
-    except Exception as e:
-        app_logger.exception(
-            "An error with syncing application commands has occured: %s",
-            e
-        )
+        Pycord 2.6.1 close() method is still bugged. Tried updating to 2.7.x
+        and still not fixed.
 
+        Returns:
+            None
+        """
 
-@bot.command()
-@commands.is_owner()
-async def shutdown(ctx: commands.Context) -> None:
-    """Shut down the bot safely. (Owner-only command)
+        app_logger.info("Masa Meter is shutting down!")
+        await self.close()
 
-    Args:
-        ctx (commands.Context): Context of the command invocation.
+    def load_cogs(self) -> None:
+        """Load all bot cogs from the cogs directory.
 
-    Returns:
-        None
+        Returns:
+            None
+        """
 
-    Examples:
-        mm shutdown
-    """
+        for file in COGS_DIR.iterdir():
+            if file.suffix == ".py" and file.stem != "__init__":
+                self.load_extension(f"bot.cogs.{file.stem}")
+                app_logger.info(f"Loaded {file}")
 
-    app_logger.info("Masa-Meter is shutting down!")
-    await ctx.send("shutting down!")
-    await bot.close()
+    def reload_cogs(self) -> None:
+        """Reload all cogs to reflect file changes.
 
+        Returns:
+            None
+        """
 
-@bot.command()
-@commands.is_owner()
-async def reload(ctx: commands.Context) -> None:
-    """Reload the bot for changes. (Owner-only command)
+        try:
+            for ext in list(self.extensions.keys()):
+                self.unload_extension(ext)
 
-    Unload all cogs first, then call load function.
+            self.load_cogs()
+        except Exception:
+            raise
 
-    Args:
-        ctx (commands.Context): Context of the command invocation.
+    @tasks.loop(seconds=5)
+    async def update_bot_status(self) -> None:
+        """Update the bot's Discord status with the current Sushi Masa Meter
 
-    Returns:
-        None
+        Returns:
+            None
+        """
 
-    Examples:
-        mm reload
-    """
+        # Polling every 5 seconds to avoid complex event-driven logic.
 
-    try:
-        for ext in list(bot.extensions.keys()):
-            await bot.unload_extension(ext)
+        with get_session() as session:
+            meter: int = get_meter(session)
 
-        await load()
-        await ctx.send("Reloaded all cogs!")
-        app_logger.info("Reloaded all cogs!")
-    except Exception as e:
-        await ctx.send("Error reloading cogs!")
-        app_logger.exception("Error reloading cogs: %s", e)
-
-
-async def load() -> None:
-    """Load all bot cogs from the cogs directory.
-
-    Returns:
-        None
-    """
-
-    # Dynamically loading cogs from the cogs directory into the bot.
-
-    for file in COGS_DIR.iterdir():
-        if file.suffix == ".py" and file.stem != "__init__":
-            await bot.load_extension(f"bot.cogs.{file.stem}")
-
-
-async def shutdown_signal() -> None:
-    """Handle SIGINT or SIGTERM and shut down the bot gracefully.
-
-
-    Returns:
-        None
-    """
-
-    app_logger.info("Masa-Meter is shutting down!")
-    await bot.close()
+        await self.change_presence(activity=discord.Activity(
+            type=discord.ActivityType.watching,
+            name=f"Sushi Masa Meter: {meter}"
+        ))
 
 
 async def main() -> None:
-    """ Run the Discord bot and register signal handlers for graceful shutdown.
+    """Run the Discord bot and register signal handlers for graceful shutdown.
+
+    Set up intents for Discord bot to run properly.
 
     Returns:
         None
     """
+
+    intents: discord.Intents = discord.Intents.default()
+    intents.message_content = True
+    intents.voice_states = True
+    bot: MasaBot = MasaBot(intents=intents)
 
     loop: asyncio.AbstractEventLoop = asyncio.get_running_loop()
 
@@ -189,13 +172,12 @@ async def main() -> None:
     for sig in (signal.SIGINT, signal.SIGTERM):
         loop.add_signal_handler(
             sig,
-            lambda: asyncio.create_task(shutdown_signal())
+            lambda: asyncio.create_task(bot.shutdown())
         )
 
     async with bot:
-        await load()
+        bot.load_cogs()
         await bot.start(BOT_TOKEN)
-
 
 if __name__ == "__main__":
     asyncio.run(main())

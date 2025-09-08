@@ -24,22 +24,23 @@
 
 Detect for variations of the phrase "Sushi Masa" in text channels and increments
 the meter when a match occurs. Provides a slash command to manually increment
-the meter for a specified user and to display the leaderboard with a custom UI
+the meter for a specified user and to display the leaderboard with a custom UI.
 """
 
 import logging
 import re
 
-import discord
-from discord import Interaction, Member, Message, app_commands
+from discord import ApplicationContext, Member, Message, Option, slash_command
+from discord.ui import View
 from discord.ext import commands
 
 from sqlalchemy import Result
 
+from bot.main import MasaBot
 from bot.ui.help_ui import HelpUI
 from bot.ui.info_ui import InfoUI
 from bot.ui.leaderboard_ui import LeaderboardUI
-from bot.utils.config_loader import command_guild_scope
+from bot.utils.config_loader import GUILD_ID_LIST
 
 from db.crud import create_mention, get_leaderboard
 from db.database import get_session
@@ -51,16 +52,17 @@ class MessageHandler(commands.Cog):
 
     Attributes:
         bot: The Discord bot instance this cog is attached to.
+        logger: Logger object that logs events from this cog.
     """
 
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: MasaBot):
         """Initialize the MessageHandler cog.
 
         Args:
             bot : Defines the Discord bot instance this cog is attached to.
         """
 
-        self.bot: commands.Bot = bot
+        self.bot: MasaBot = bot
         self.logger: logging.Logger = logging.getLogger(__name__)
 
     @commands.Cog.listener()
@@ -106,9 +108,12 @@ class MessageHandler(commands.Cog):
             self.logger.info(f"{message.author.name} said Sushi Masa")
             await message.reply("Masa Meter has gone up!")
 
-    @command_guild_scope
-    @app_commands.command(name="help", description="Shows Masa Meter commands")
-    async def help(self, interaction: Interaction) -> None:
+    @slash_command(
+        name="help",
+        description="Show Masa Meter commands",
+        guild_ids=GUILD_ID_LIST
+    )
+    async def help(self, ctx: ApplicationContext) -> None:
         """Show all the avaiable bot slash commands.
 
         Args:
@@ -118,13 +123,16 @@ class MessageHandler(commands.Cog):
             None
         """
 
-        help_ui: discord.ui.View = HelpUI()
+        help_ui: View = HelpUI()
 
-        await help_ui.start(interaction)
+        await help_ui.start(ctx)
 
-    @command_guild_scope
-    @app_commands.command(name="info", description="Shows info about the bot")
-    async def info(self, interaction: Interaction) -> None:
+    @slash_command(
+        name="info",
+        description="Shows info about the bot",
+        guild_ids=GUILD_ID_LIST
+    )
+    async def info(self, ctx: ApplicationContext) -> None:
         """Show information about the bot, including description and useful
         links
 
@@ -135,17 +143,19 @@ class MessageHandler(commands.Cog):
             None
         """
 
-        info_ui: discord.ui.View = InfoUI()
+        info_ui: View = InfoUI()
 
-        await info_ui.start(interaction)
+        await info_ui.start(ctx)
 
-    @command_guild_scope
-    @app_commands.command(
-        name="increment", description="Increments the Masa Meter"
+    @slash_command(
+        name="increment",
+        description="Increments the Masa Meter",
+        guild_ids=GUILD_ID_LIST
     )
-    @app_commands.describe(speaker="Person who said Sushi Masa")
     async def increment(
-        self, interaction: Interaction, speaker: Member
+        self,
+        ctx: ApplicationContext,
+        speaker=Option(Member, "Person who said Sushi Masa")
     ) -> None:
         """Increments the meter manually for a specified user.
 
@@ -164,15 +174,14 @@ class MessageHandler(commands.Cog):
             create_mention(session, speaker.name)
 
         self.logger.info(f"{speaker.name} said Sushi Masa")
-        await interaction.response.send_message(
-            "Masa Meter has gone up!", silent=True
-        )
+        await ctx.respond("Masa Meter has gone up!")
 
-    @command_guild_scope
-    @app_commands.command(
-        name="leaderboard", description="Shows the leaderboard"
+    @slash_command(
+        name="leaderboard",
+        description="Shows the leaderboard",
+        guild_ids=GUILD_ID_LIST
     )
-    async def leaderboard(self, interaction: Interaction) -> None:
+    async def leaderboard(self, ctx: ApplicationContext) -> None:
         """Display the Masa Meter leaderboard.
 
         Fetch leaderboard data from the database and start the leaderboard UI.
@@ -187,16 +196,16 @@ class MessageHandler(commands.Cog):
         with get_session() as session:
             results: Result = get_leaderboard(session)
 
-        leaderboard_ui: discord.ui.View = LeaderboardUI(results)
+        leaderboard_ui: View = LeaderboardUI(results)
 
         self.logger.info(
-            f"{interaction.user.name} used the leaderboard command"
+            f"{ctx.author.name} used the leaderboard command"
         )
 
-        await leaderboard_ui.start(interaction)
+        await leaderboard_ui.start(ctx)
 
 
-async def setup(bot: commands.Bot) -> None:
+def setup(bot: commands.Bot) -> None:
     """Load the VoiceHandler cog into the bot.
 
     Args:
@@ -206,4 +215,4 @@ async def setup(bot: commands.Bot) -> None:
         None
     """
 
-    await bot.add_cog(MessageHandler(bot))
+    bot.add_cog(MessageHandler(bot))
