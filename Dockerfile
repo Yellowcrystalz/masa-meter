@@ -1,7 +1,7 @@
 FROM python:3.11-slim
 WORKDIR /app
 COPY . .
-RUN apt-get upgrade && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 RUN pip install -U git+https://github.com/Pycord-Development/pycord
 RUN chmod +x start.sh
