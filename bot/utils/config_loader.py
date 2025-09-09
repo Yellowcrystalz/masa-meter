@@ -31,7 +31,7 @@ development and production server are scoped.
 import argparse
 from enum import Enum
 
-from discord import app_commands
+from discord import Object, app_commands
 
 from config import (
     DISCORD_BOT_TOKEN, TEST_BOT_TOKEN, MAIN_GUILD_ID, DEV_GUILD_ID
@@ -66,18 +66,26 @@ async def tree_sync(tree):
     """
 
     try:
-        synced_dev_commands: list = await tree.sync(DEV_GUILD_ID)
+        dev_guild: Object = Object(id=DEV_GUILD_ID)
+        synced_dev_commands: list = await tree.sync(guild=dev_guild)
+
         if len(synced_dev_commands) == 1:
-            app_logger.info("Synced 1 dev command.")
+            app_logger.info("Synced 1 developement command.")
         else:
-            app_logger.info(f"Synced {len(synced_dev_commands)} dev commands.")
+            app_logger.info(
+                f"Synced {len(synced_dev_commands)} development commands."
+            )
 
         if MODE == Mode.PROD:
-            synced_prod_commands: list = await tree.sync(MAIN_GUILD_ID)
+            main_guild: Object = Object(id=MAIN_GUILD_ID)
+            synced_prod_commands: list = await tree.sync(guild=main_guild)
+
             if len(synced_prod_commands) == 1:
-                app_logger.info("Synced 1 command.")
+                app_logger.info("Synced 1 production command.")
             else:
-                app_logger.info(f"Synced {len(synced_prod_commands)} commands.")
+                app_logger.info(
+                    f"Synced {len(synced_prod_commands)} produdction commands."
+                )
 
     except Exception as e:
         app_logger.exception(
