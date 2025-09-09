@@ -70,18 +70,22 @@ async def tree_sync(tree):
         synced_dev_commands: list = await tree.sync(guild=dev_guild)
 
         if len(synced_dev_commands) == 1:
-            app_logger.info("Synced 1 dev command.")
+            app_logger.info("Synced 1 developement command.")
         else:
-            app_logger.info(f"Synced {len(synced_dev_commands)} dev commands.")
+            app_logger.info(
+                f"Synced {len(synced_dev_commands)} development commands."
+            )
 
         if MODE == Mode.PROD:
             main_guild: Object = Object(id=MAIN_GUILD_ID)
             synced_prod_commands: list = await tree.sync(guild=main_guild)
 
             if len(synced_prod_commands) == 1:
-                app_logger.info("Synced 1 command.")
+                app_logger.info("Synced 1 production command.")
             else:
-                app_logger.info(f"Synced {len(synced_prod_commands)} commands.")
+                app_logger.info(
+                    f"Synced {len(synced_prod_commands)} produdction commands."
+                )
 
     except Exception as e:
         app_logger.exception(
