@@ -25,7 +25,7 @@ web dashboard and GitHub repository.
 """
 
 import discord
-from discord import ApplicationContext
+from discord import Interaction
 
 
 class InfoUI(discord.ui.View):
@@ -54,7 +54,7 @@ class InfoUI(discord.ui.View):
             inline=False
         )
 
-    async def start(self, ctx: ApplicationContext) -> None:
+    async def start(self, interaction: Interaction) -> None:
         """Send the leaderboard as a response to an interaction.
 
         Args:
@@ -64,7 +64,8 @@ class InfoUI(discord.ui.View):
             None
         """
 
-        await ctx.respond(
+        await interaction.response.send_message(
             embed=self.embed,
+            silent=True,
             view=self
         )

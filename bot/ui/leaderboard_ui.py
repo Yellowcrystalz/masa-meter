@@ -28,7 +28,7 @@ view that can show the leaderboard in response to an interaction.
 """
 
 import discord
-from discord import ApplicationContext
+from discord import Interaction
 
 from sqlalchemy import Result
 
@@ -99,7 +99,7 @@ class LeaderboardUI(discord.ui.View):
 
         return message
 
-    async def start(self, ctx: ApplicationContext) -> None:
+    async def start(self, interaction: Interaction) -> None:
         """Send the leaderboard as a response to an interaction.
 
         Args:
@@ -109,7 +109,8 @@ class LeaderboardUI(discord.ui.View):
             None
         """
 
-        await ctx.respond(
+        await interaction.response.send_message(
             embed=self.embed,
+            silent=True,
             view=self
         )

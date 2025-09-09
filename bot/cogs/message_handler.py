@@ -30,7 +30,7 @@ the meter for a specified user and to display the leaderboard with a custom UI.
 import logging
 import re
 
-from discord import ApplicationContext, Member, Message, Option, slash_command
+from discord import Interaction, Member, Message, app_commands
 from discord.ui import View
 from discord.ext import commands
 
@@ -40,7 +40,7 @@ from bot.main import MasaBot
 from bot.ui.help_ui import HelpUI
 from bot.ui.info_ui import InfoUI
 from bot.ui.leaderboard_ui import LeaderboardUI
-from bot.utils.config_loader import GUILD_ID_LIST
+from bot.utils.config_loader import command_guild_scope
 
 from db.crud import create_mention, get_leaderboard
 from db.database import get_session
@@ -109,12 +109,12 @@ class MessageHandler(commands.Cog):
             self.logger.info(f"{message.author.name} said Sushi Masa")
             await message.reply("Masa Meter has gone up!")
 
-    @slash_command(
+    @command_guild_scope
+    @app_commands.command(
         name="help",
-        description="Show Masa Meter commands",
-        guild_ids=GUILD_ID_LIST
+        description="Show Masa Meter commands"
     )
-    async def help(self, ctx: ApplicationContext) -> None:
+    async def help(self, interaction: Interaction) -> None:
         """Show all the avaiable bot slash commands.
 
         Args:
@@ -126,14 +126,14 @@ class MessageHandler(commands.Cog):
 
         help_ui: View = HelpUI()
 
-        await help_ui.start(ctx)
+        await help_ui.start(interaction)
 
-    @slash_command(
+    @command_guild_scope
+    @app_commands.command(
         name="info",
-        description="Shows info about the bot",
-        guild_ids=GUILD_ID_LIST
+        description="Shows info about the bot"
     )
-    async def info(self, ctx: ApplicationContext) -> None:
+    async def info(self, interaction: Interaction) -> None:
         """Show information about the bot, including description and useful
         links
 
@@ -146,17 +146,16 @@ class MessageHandler(commands.Cog):
 
         info_ui: View = InfoUI()
 
-        await info_ui.start(ctx)
+        await info_ui.start(interaction)
 
-    @slash_command(
+    @command_guild_scope
+    @app_commands.command(
         name="increment",
-        description="Increments the Masa Meter",
-        guild_ids=GUILD_ID_LIST
+        description="Increments the Masa Meter"
     )
+    @app_commands.describe(speaker="Person who said Sushi Masa")
     async def increment(
-        self,
-        ctx: ApplicationContext,
-        speaker=Option(Member, "Person who said Sushi Masa")
+            self, interaction: Interaction, speaker: Member
     ) -> None:
         """Increments the meter manually for a specified user.
 
@@ -175,14 +174,16 @@ class MessageHandler(commands.Cog):
             create_mention(session, speaker.name)
 
         self.logger.info(f"{speaker.name} said Sushi Masa")
-        await ctx.respond("Masa Meter has gone up!")
+        await interaction.response.send_message(
+            "Masa Meter has gone up!", silent=True
+        )
 
-    @slash_command(
+    @command_guild_scope
+    @app_commands.command(
         name="leaderboard",
-        description="Shows the leaderboard",
-        guild_ids=GUILD_ID_LIST
+        description="Shows the leaderboard"
     )
-    async def leaderboard(self, ctx: ApplicationContext) -> None:
+    async def leaderboard(self, interaction: Interaction) -> None:
         """Display the Masa Meter leaderboard.
 
         Fetch leaderboard data from the database and start the leaderboard UI.
@@ -200,13 +201,13 @@ class MessageHandler(commands.Cog):
         leaderboard_ui: View = LeaderboardUI(results)
 
         self.logger.info(
-            f"{ctx.author.name} used the leaderboard command"
+            f"{interaction.user.name} used the leaderboard command"
         )
 
-        await leaderboard_ui.start(ctx)
+        await leaderboard_ui.start(interaction)
 
 
-def setup(bot: commands.Bot) -> None:
+async def setup(bot: MasaBot) -> None:
     """Load the VoiceHandler cog into the bot.
 
     Args:
@@ -216,4 +217,4 @@ def setup(bot: commands.Bot) -> None:
         None
     """
 
-    bot.add_cog(MessageHandler(bot))
+    await bot.add_cog(MessageHandler(bot))

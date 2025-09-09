@@ -40,20 +40,26 @@ import asyncio
 import signal
 
 import discord
-from discord.ext import tasks
+from discord.ext import commands, tasks
 
 from config import COGS_DIR
 
-from bot.utils.config_loader import BOT_TOKEN
+from bot.utils.config_loader import BOT_TOKEN, tree_sync
 from bot.utils.logger import app_logger
 
 from db.crud import get_meter
 from db.database import get_session
 
 
-class MasaBot(discord.Bot):
+class MasaBot(commands.Bot):
+    """
+    """
+
+    def __init__(self, command_prefix, intents):
+        super().__init__(command_prefix=command_prefix, intents=intents)
+
     async def on_ready(self) -> None:
-        """Set up bot when the bot is ready and connected to Discord.
+        """Log bot connection and start the background status update task.
 
         Returns:
             None
@@ -61,41 +67,13 @@ class MasaBot(discord.Bot):
 
         app_logger.info("Masa Meter is connected to Discord!")
         self.update_bot_status.start()
+
+        await tree_sync(self.tree)
+
         app_logger.info("Masa Meter is ready!")
-        print("Ready")
-
-    async def close(self) -> None:
-        """Close the connection to Discord.
-
-        Use Pycord 2.6.1 implementaion of close() since Pycord 2.7.x throws an
-        error.
-
-        Returns:
-            None
-        """
-        if self._closed:
-            return
-
-        self._closed = True
-
-        for voice in self.voice_clients:
-            try:
-                await voice.disconnect(force=True)
-            except Exception:
-                # if an error happens during disconnects, disregard it.
-                pass
-
-        if self.ws is not None and self.ws.open:
-            await self.ws.close(code=1000)
-
-        await self.http.close()
-        self._ready.clear()
 
     async def shutdown(self) -> None:
         """Shut down the bot "safely" and logs it.
-
-        Pycord 2.6.1 close() method is still bugged. Tried updating to 2.7.x
-        and still not fixed.
 
         Returns:
             None
@@ -104,7 +82,7 @@ class MasaBot(discord.Bot):
         app_logger.info("Masa Meter is shutting down!")
         await self.close()
 
-    def load_cogs(self) -> None:
+    async def load_cogs(self) -> None:
         """Load all bot cogs from the cogs directory.
 
         Returns:
@@ -113,10 +91,10 @@ class MasaBot(discord.Bot):
 
         for file in COGS_DIR.iterdir():
             if file.suffix == ".py" and file.stem != "__init__":
-                self.load_extension(f"bot.cogs.{file.stem}")
+                await self.load_extension(f"bot.cogs.{file.stem}")
                 app_logger.info(f"Loaded {file}")
 
-    def reload_cogs(self) -> None:
+    async def reload_cogs(self) -> None:
         """Reload all cogs to reflect file changes.
 
         Returns:
@@ -125,9 +103,9 @@ class MasaBot(discord.Bot):
 
         try:
             for ext in list(self.extensions.keys()):
-                self.unload_extension(ext)
+                await self.unload_extension(ext)
 
-            self.load_cogs()
+            await self.load_cogs()
         except Exception:
             raise
 
@@ -162,7 +140,7 @@ async def main() -> None:
     intents: discord.Intents = discord.Intents.default()
     intents.message_content = True
     intents.voice_states = True
-    bot: MasaBot = MasaBot(intents=intents)
+    bot: MasaBot = MasaBot(command_prefix="mm", intents=intents)
 
     loop: asyncio.AbstractEventLoop = asyncio.get_running_loop()
 
@@ -176,7 +154,7 @@ async def main() -> None:
         )
 
     async with bot:
-        bot.load_cogs()
+        await bot.load_cogs()
         await bot.start(BOT_TOKEN)
 
 if __name__ == "__main__":
