@@ -29,7 +29,7 @@ bot.
 
 import logging
 
-from discord import ApplicationContext, slash_command
+from discord import Interaction, app_commands
 from discord.ext import commands
 
 from config import DEV_GUILD_ID
@@ -49,17 +49,17 @@ class Admin(commands.Cog):
         self.bot: MasaBot = bot
         self.logger: logging.Logger = logging.getLogger(__name__)
 
-    @slash_command(
+    @app_commands.guilds(DEV_GUILD_ID)
+    @app_commands.command(
         name="shutdown",
-        description="Shutdown the bot (owner only)",
-        guild_ids=[DEV_GUILD_ID]
+        description="Shutdown the bot (owner only)"
     )
     @commands.is_owner()
-    async def shutdown(self, ctx: ApplicationContext) -> None:
+    async def shutdown(self, interaction: Interaction) -> None:
         """Shut down the bot safely. (Owner-only command)
 
         Args:
-            ctx (commands.Context): Context of the command invocation.
+            interaction (Interaction): Discord command interaction.
 
         Returns:
             None
@@ -68,20 +68,22 @@ class Admin(commands.Cog):
             /shutdown
         """
 
-        await ctx.respond("Masa Meter is shutting down!", ephemeral=True)
+        await interaction.response.send_message(
+            "Masa Meter is shutting down!", ephemeral=True
+        )
         await self.bot.shutdown()
 
-    @slash_command(
+    @app_commands.guilds(DEV_GUILD_ID)
+    @app_commands.command(
         name="reload",
         description="Reload the bot (owner only)",
-        guild_ids=[DEV_GUILD_ID]
     )
     @commands.is_owner()
-    async def reload(self, ctx: ApplicationContext) -> None:
+    async def reload(self, interaction: Interaction) -> None:
         """Reload the bot for file changes. (Owner-only command)
 
         Args:
-            ctx: Context of the command invocation.
+            interaction (Interaction): Discord command interaction.
 
         Returns:
             None
@@ -91,17 +93,19 @@ class Admin(commands.Cog):
         """
 
         try:
-            self.bot.reload_cogs()
+            await self.bot.reload_cogs()
             self.logger.info("Masa Meter has reloaded all cogs!")
-            await ctx.respond(
+            await interaction.response.send_message(
                 "Masa Meter has reloaded all cogs!", ephemeral=True
             )
         except Exception as e:
             self.logger.exception("Error reloading cogs: %s", e)
-            await ctx.respond("Error reloading cogs!", ephemeral=True)
+            await interaction.response.send_message(
+                "Error reloading cogs!", ephemeral=True
+            )
 
 
-def setup(bot: MasaBot) -> None:
+async def setup(bot: MasaBot) -> None:
     """Load the Admin cog into the bot.
 
     Args:
@@ -111,4 +115,4 @@ def setup(bot: MasaBot) -> None:
         None
     """
 
-    bot.add_cog(Admin(bot))
+    await bot.add_cog(Admin(bot))

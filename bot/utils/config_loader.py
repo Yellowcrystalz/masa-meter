@@ -24,16 +24,20 @@
 
 Handle runtime mode selection and configures the Discord bot's token and guild
 scope. In development mode, test bot token is used and development server is
-scoped. In production mode, the actual bot token is used and production server
-is scoped.
+scoped. In production mode, the actual bot token is used and both the
+development and production server are scoped.
 """
 
 import argparse
 from enum import Enum
 
+from discord import app_commands
+
 from config import (
     DISCORD_BOT_TOKEN, TEST_BOT_TOKEN, MAIN_GUILD_ID, DEV_GUILD_ID
 )
+
+from bot.utils.logger import app_logger
 
 
 class Mode(Enum):
@@ -55,6 +59,52 @@ args: argparse.Namespace = parser.parse_args()
 
 MODE: Mode = Mode.PROD if args.prod else Mode.DEV
 BOT_TOKEN: str = DISCORD_BOT_TOKEN if MODE == Mode.PROD else TEST_BOT_TOKEN
-GUILD_ID_LIST: list[int] = (
-    [DEV_GUILD_ID, MAIN_GUILD_ID] if MODE == Mode.PROD else [DEV_GUILD_ID]
-)
+
+
+async def tree_sync(tree):
+    """
+    """
+
+    try:
+        synced_dev_commands: list = await tree.sync(DEV_GUILD_ID)
+        if len(synced_dev_commands) == 1:
+            app_logger.info("Synced 1 dev command.")
+        else:
+            app_logger.info(f"Synced {len(synced_dev_commands)} dev commands.")
+
+        if MODE == Mode.PROD:
+            synced_prod_commands: list = await tree.sync(MAIN_GUILD_ID)
+            if len(synced_prod_commands) == 1:
+                app_logger.info("Synced 1 command.")
+            else:
+                app_logger.info(f"Synced {len(synced_prod_commands)} commands.")
+
+    except Exception as e:
+        app_logger.exception(
+            "An error with syncing application commands has occured: %s",
+            e
+        )
+
+
+def command_guild_scope(func):
+    """Set an application (slash) command's guild scope based on the current
+    mode.
+
+    This function is a decorator.
+
+    In development mode, the command is scoped to the development guild.
+    In production mode, the command is scoped to the development and main guild.
+
+    Args:
+        func (Callable): The command function to decorate.
+
+    Return:
+        Callable: The decorated function with the guild scope applied.
+    """
+
+    if MODE == Mode.DEV:
+        func = app_commands.guilds(DEV_GUILD_ID)(func)
+    elif MODE == Mode.PROD:
+        func = app_commands.guilds(DEV_GUILD_ID, MAIN_GUILD_ID)(func)
+
+    return func
