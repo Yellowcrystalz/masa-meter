@@ -1,0 +1,35 @@
+.header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.logoBox {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.logo {
+    width: 32px;
+    height: 32px;
+}
+
+.navMenu {
+    background-color: black;
+    color: white;
+    width: 100%;
+    max-width: 320px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    right: -320px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: right .3s ease;
+}
+
+.navMenu.active {
+    right: 0;
+}

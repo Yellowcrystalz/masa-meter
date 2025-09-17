@@ -7,7 +7,7 @@ python -m bot.main --prod &
 BOT_PID=$!
 
 echo "Starting Web App"
-uvicorn api.main:app --host 0.0.0.0 --port 8080 &
+uvicorn api.main:app --host 0.0.0.0 --port 8000 &
 WEBAPP_PID=$!
 
 cleanup() {

@@ -4,5 +4,5 @@ COPY . .
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 RUN chmod +x start.sh
-EXPOSE 8080
+EXPOSE 8000
 CMD ["bash", "start.sh"]

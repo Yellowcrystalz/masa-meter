@@ -41,6 +41,7 @@ Examples:
 from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -58,44 +59,50 @@ from db.database import get_session
 
 
 app = FastAPI()
-app.mount(
-    "/static", StaticFiles(directory=FRONTEND_DIR, html=True), name="static"
+app.add_middleware(
+    CORSMiddleware,
+    allow_headers=["*"],
+    allow_methods=["*"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:5173"
+    ],
 )
 
 
-@app.get("/", response_class=HTMLResponse)
-def index():
-    """Serve the main index page with dynamic cache-busting.
-
-    Returns:
-        Renedered index page with cache-busting applied to static files.
-    """
-
-    html_content: str = apply_cache_busting(INDEX_PATH.read_text())
-
-    return HTMLResponse(html_content)
-
-
-@app.get("/html/{file_name}", response_class=HTMLResponse)
-def serve_html(file_name: str):
-    """Serve a requested HTML file with cache-busting applied
-
-    Args:
-        file_name: Name of the HTML file being requested.
-
-    Returns:
-        Renedered index page with cahce-busting applied to static files if it
-        exist; otherwise a 404 response.
-    """
-
-    html_file: Path = HTML_DIR / file_name
-
-    if not html_file.exists() or html_file.suffix != ".html":
-        return HTMLResponse("File not found", status_code=404)
-
-    html_content: str = apply_cache_busting(html_file.read_text())
-
-    return HTMLResponse(html_content)
+# @app.get("/", response_class=HTMLResponse)
+# def index():
+#     """Serve the main index page with dynamic cache-busting.
+# 
+#     Returns:
+#         Renedered index page with cache-busting applied to static files.
+#     """
+# 
+#     html_content: str = apply_cache_busting(INDEX_PATH.read_text())
+# 
+#     return HTMLResponse(html_content)
+# 
+# 
+# @app.get("/html/{file_name}", response_class=HTMLResponse)
+# def serve_html(file_name: str):
+#     """Serve a requested HTML file with cache-busting applied
+# 
+#     Args:
+#         file_name: Name of the HTML file being requested.
+# 
+#     Returns:
+#         Renedered index page with cahce-busting applied to static files if it
+#         exist; otherwise a 404 response.
+#     """
+# 
+#     html_file: Path = HTML_DIR / file_name
+# 
+#     if not html_file.exists() or html_file.suffix != ".html":
+#         return HTMLResponse("File not found", status_code=404)
+# 
+#     html_content: str = apply_cache_busting(html_file.read_text())
+# 
+#     return HTMLResponse(html_content)
 
 
 @app.get("/api/meter")
