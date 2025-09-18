@@ -1,7 +1,7 @@
 * {
     margin: 0;
     padding: 0;
-    box-sizing: borderbox;
+    box-sizing: border-box;
 }
 
 body {
@@ -21,4 +21,12 @@ ul, ol {
 a {
     text-decoration: none;
     color: inherit;
+}
+
+button {
+    cursor: pointer;
+    background: none;
+    border: none;
+    font: inherit;
+    color: inherit
 }

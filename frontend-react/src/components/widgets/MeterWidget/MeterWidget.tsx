@@ -1,4 +1,5 @@
-import logo from "@assets/images/masa_logo_big_light.png"
+import logo from "@assets/images/masa_logo_big_light.png";
+import styles from "@components/widgets/MeterWidget/MeterWidget.module.css";
 import { useEffect, useState } from "react";
 
 const MeterWidget = () => {
@@ -19,10 +20,10 @@ const MeterWidget = () => {
     }, []);
     
     return (
-        <>
-            <img src={logo} alt="" />
+        <div className={styles.meterWidget}>
+            <img src={logo} className={styles.logo}/>
             <h1>{meter}</h1>
-        </>
+        </div>
     );
 }
 

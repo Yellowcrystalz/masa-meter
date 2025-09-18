@@ -1,0 +1,12 @@
+.meterWidget {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    border: 1px solid black;
+}
+
+.logo {
+    width: 250px;
+    height: 175px;
+}
