@@ -6,7 +6,7 @@ services:
     container_name: api
     image: api:latest
     ports:
-      - "8000"
+      - "8000:8000"
     restart: unless-stopped
     volumes:
       - ./data:/app/data
@@ -30,7 +30,7 @@ services:
     depends_on:
       - api
     ports:
-      - "80"
+      - "80:80"
     restart: unless-stopped
 
   cloudflared:
