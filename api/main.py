@@ -47,6 +47,8 @@ import requests
 
 from sqlalchemy import Result
 
+from config import PEXELS_API_KEY, PEXELS_URL
+
 from db.crud import (
     get_achievements as crud_get_achievements,
     get_history as crud_get_history,
