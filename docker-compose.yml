@@ -32,6 +32,7 @@ services:
   frontend:
     build:
       context: ./frontend
+      dockerfile: Dockerfile
     image: frontend:beta
     container_name: frontend
     depends_on:
