@@ -38,19 +38,19 @@ Examples:
         uvicorn api.main:app --reload
 """
 
-from pathlib import Path
+import random
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
+
+import requests
 
 from sqlalchemy import Result
 
-from config import FRONTEND_DIR, HTML_DIR, INDEX_PATH
+from config import PEXELS_API_KEY, PEXELS_URL
 
-from api.cache_busting import apply_cache_busting
 from db.crud import (
+    get_achievements as crud_get_achievements,
     get_history as crud_get_history,
     get_leaderboard as crud_get_leaderboard,
     get_meter as crud_get_meter
@@ -65,44 +65,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_origins=[
         "http://localhost:3000",
-        "http://localhost:5173"
+        "http://127.0.0.1:3000",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
     ],
 )
-
-
-# @app.get("/", response_class=HTMLResponse)
-# def index():
-#     """Serve the main index page with dynamic cache-busting.
-# 
-#     Returns:
-#         Renedered index page with cache-busting applied to static files.
-#     """
-# 
-#     html_content: str = apply_cache_busting(INDEX_PATH.read_text())
-# 
-#     return HTMLResponse(html_content)
-# 
-# 
-# @app.get("/html/{file_name}", response_class=HTMLResponse)
-# def serve_html(file_name: str):
-#     """Serve a requested HTML file with cache-busting applied
-# 
-#     Args:
-#         file_name: Name of the HTML file being requested.
-# 
-#     Returns:
-#         Renedered index page with cahce-busting applied to static files if it
-#         exist; otherwise a 404 response.
-#     """
-# 
-#     html_file: Path = HTML_DIR / file_name
-# 
-#     if not html_file.exists() or html_file.suffix != ".html":
-#         return HTMLResponse("File not found", status_code=404)
-# 
-#     html_content: str = apply_cache_busting(html_file.read_text())
-# 
-#     return HTMLResponse(html_content)
 
 
 @app.get("/api/meter")
@@ -172,3 +139,70 @@ def get_leaderboard() -> list[dict]:
         })
 
     return leaderboard
+
+@app.get("/api/achievements")
+def get_achievements() -> list[dict]:
+    """
+    """
+
+    with get_session() as session:
+        achievements_list: list[str] = (
+            crud_get_achievements(session)
+        )
+    
+    achievements: list[dict] = []
+
+    achievements.append({
+        "achievement_name": "Masa Master",
+        "description": "Who said it the most!",
+        "emoji": "\U0001F451",
+        "username": achievements_list[0]
+    })
+    achievements.append({
+        "achievement_name": "Silent Sashimi",
+        "description": "Who said it the least!",
+        "emoji": "\U0001F64A",
+        "username": achievements_list[1]
+    })
+    achievements.append({
+        "achievement_name": "Tempura Titan",
+        "description": "Who said it the most in one day!",
+        "emoji": "\U0001F364",
+        "username": achievements_list[2]
+    })
+    achievements.append({
+        "achievement_name": "Nigiri Ninja",
+        "description": "Who is the only one to say it on a certain day!",
+        "emoji": "\U0001F977",
+        "username": achievements_list[3]
+    })
+    achievements.append({
+        "achievement_name": "Special Sushi",
+        "description": "Who said it on yellowcrystalz's birthday!",
+        "emoji": "\U0001F363",
+        "username": achievements_list[4]
+    })
+    
+    return achievements 
+
+@app.get("/api/sushi-pic")
+def get_sushi_pic():
+    headers = {
+        "Authorization": PEXELS_API_KEY
+    }
+
+    params = {
+        "query": "sushi art",
+        "per_page": 50
+    }
+
+    try:
+        response = requests.get(PEXELS_URL, headers=headers, params=params)
+        data = response.json()
+        photo = random.choice(data["photos"])
+        url = photo["src"]["medium"]
+
+        return {"sushi_pic_url": url}
+
+    except:
+        return {"error": "Failed to fetch sushi picture from Pexels"}

@@ -1,0 +1,15 @@
+.picContainer {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.sushiPic {
+    max-width: 13.75rem;
+    max-height: 18.75rem;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+}

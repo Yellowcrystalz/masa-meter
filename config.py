@@ -60,7 +60,5 @@ JOIN_MP3_PATH = AUDIO_DIR / "join.mp3"
 LEAVE_MP3_PATH = AUDIO_DIR / "leave.mp3"
 
 # Frontend
-FRONTEND_DIR = BASE_DIR / "frontend"
-HTML_DIR = FRONTEND_DIR / "html"
-
-INDEX_PATH = FRONTEND_DIR / "index.html"
+PEXELS_API_KEY = os.getenv("PEXELS_API_KEY")
+PEXELS_URL = "https://api.pexels.com/v1/search"

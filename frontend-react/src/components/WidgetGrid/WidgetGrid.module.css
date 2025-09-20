@@ -1,9 +1,0 @@
-.widgetGrid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(2, 1fr);
-    gap: 4px;
-    height: 100%;
-    width: 100%;
-    padding: 16px clamp(0px, 30vw, 350px);
-}

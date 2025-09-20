@@ -1,0 +1,16 @@
+.meterWidget {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    color: black;
+}
+
+.logo {
+    width: 13.75rem;
+    height: 9.625rem;
+}
+
+.meter {
+    font-size: 4rem;
+}
