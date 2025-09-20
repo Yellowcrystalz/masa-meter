@@ -9,7 +9,7 @@ const HistoryWidget = () => {
 
     useEffect(() => {
         const updateHistory = () => {
-            fetch("http://localhost:8000/api/history")
+            fetch("/api/history")
                 .then((response) => response.json())
                 .then((data: HistoryEntry[]) => {
                     let tempData: HistoryEntry[] = [];

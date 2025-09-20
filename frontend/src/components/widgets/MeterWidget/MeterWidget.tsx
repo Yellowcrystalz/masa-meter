@@ -7,7 +7,7 @@ const MeterWidget = () => {
 
     useEffect(() => {
         const updateMeter = () => {
-            fetch("http://localhost:8000/api/meter")
+            fetch("/api/meter")
                 .then((response) => response.json())
                 .then((data) => setMeter(data[0].meter))
                 .catch(error => console.error(error));
