@@ -4,9 +4,7 @@ COPY .env ./
 COPY config.py ./
 COPY api/ ./api/
 COPY db/ ./db/
-COPY bot/requirements.txt ./
-RUN python -m venv .venv && \
-    source .venv/bin/activate
+COPY api/requirements.txt ./
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 EXPOSE 8000

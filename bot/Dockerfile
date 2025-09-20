@@ -5,8 +5,6 @@ COPY config.py ./
 COPY bot/ ./bot/
 COPY db/ ./db/
 COPY bot/requirements.txt ./
-RUN python -m venv .venv && \
-    source .venv/bin/activate
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 CMD ["python", "-m", "bot.main"]
