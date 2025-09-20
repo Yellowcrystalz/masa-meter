@@ -58,7 +58,3 @@ DISCORD_LOG_PATH = DATA_DIR / "discord.log"
 
 JOIN_MP3_PATH = AUDIO_DIR / "join.mp3"
 LEAVE_MP3_PATH = AUDIO_DIR / "leave.mp3"
-
-# Frontend
-PEXELS_API_KEY = os.getenv("PEXELS_API_KEY")
-PEXELS_URL = "https://api.pexels.com/v1/search"
