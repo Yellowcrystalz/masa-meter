@@ -2,7 +2,7 @@ FROM node:20-alpine as build
 WORKDIR /app
 COPY package*.json ./
 COPY . .
-RUN npm install -g npm@11.6.0 && /
+RUN npm install -g npm@11.6.0 && \
     npm install
 RUN npm run build
 
