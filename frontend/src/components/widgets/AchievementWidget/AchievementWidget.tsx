@@ -9,7 +9,7 @@ const AchievementWidget = () => {
 
     useEffect(()=> {
         const updateAchievement = () => {
-            fetch("http://localhost:8000/api/achievements")
+            fetch("/api/achievements")
                 .then((response) => response.json())
                 .then((data: AchievementEntry[]) => (setAchievementData(data)))
                 .catch(error => console.error(error));

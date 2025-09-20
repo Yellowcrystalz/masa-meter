@@ -8,7 +8,7 @@ const StatWidget = () => {
 
     useEffect(() => {
         const updateLeaderboard = () => {
-            fetch("http://localhost:8000/api/leaderboard")
+            fetch("/api/leaderboard")
                 .then((response) => response.json())
                 .then((data: LeaderboardEntry[]) => {
                     let tempData: LeaderboardEntry[] = [];

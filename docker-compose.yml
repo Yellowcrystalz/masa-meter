@@ -1,20 +1,43 @@
 services:
-  app:
+  api:
     build:
       context: .
-      dockerfile: Dockerfile
-    container_name: masa_meter
-    image: masa_meter:beta
+      dockerfile: api/Dockerfile
+    container_name: api
+    image: api:latest
     ports:
       - "8000:8000"
-    restart: always
+    restart: unless-stopped
     volumes:
       - ./data:/app/data
+  
+  bot:
+    build:
+      context: .
+      dockerfile: bot/Dockerfile
+    container_name: bot
+    image: bot:latest
+    restart: unless-stopped
+    volumes:
+      - ./data:/app/data
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: frontend:latest
+    container_name: frontend
+    depends_on:
+      - api
+    ports:
+      - "80:80"
+    restart: unless-stopped
 
   cloudflared:
     image: cloudflare/cloudflared:latest
     command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
     container_name: cloudflared
     depends_on:
-      - app
-    restart: always
+      - api
+      - frontend
+    restart: unless-stopped

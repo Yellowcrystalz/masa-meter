@@ -7,7 +7,7 @@ const SushiPicWidget = () => {
     const [url, setUrl] = useState("");
 
     useEffect(() => {
-        fetch("http://localhost:8000/api/sushi-pic")
+        fetch("/api/sushi-pic")
             .then((response) => response.json())
             .then((data) => {
                 setUrl(data.sushi_pic_url);
