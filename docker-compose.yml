@@ -1,12 +1,22 @@
 services:
-  app:
+  api:
     build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: masa_meter
-    image: masa_meter:beta
+      context: ./api
+      dockerfile: api/Dockerfile
+    container_name: api
+    image: api:beta
     ports:
       - "8000:8000"
+    restart: always
+    volumes:
+      - ./data:/app/data
+  
+  bot:
+    build:
+      context: .
+      dockerfile: bot/Dockerfile
+    container_name: bot
+    image: bot:beta
     restart: always
     volumes:
       - ./data:/app/data
@@ -16,5 +26,16 @@ services:
     command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
     container_name: cloudflared
     depends_on:
-      - app
+      - frontend
+    restart: always
+
+  frontend:
+    build:
+      context: ./frontend
+    image: frontend:beta
+    container_name: frontend
+    depends_on:
+      - api
+    ports:
+      - "80:80"
     restart: always
