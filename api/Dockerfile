@@ -2,7 +2,7 @@ FROM python:3.11-slim
 WORKDIR /app
 COPY .env ./
 COPY config.py ./
-COPY api/ ./bot/
+COPY api/ ./api/
 COPY db/ ./db/
 COPY bot/requirements.txt ./
 RUN python -m .venv .venv && \
