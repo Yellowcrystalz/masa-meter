@@ -1,24 +1,20 @@
-<!DOCTYPE>
+<!doctype html>
 <html lang="en">
-    <head>
-        <title>Masa Meter</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100..700;1,100..700&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="/static/css/style.css">
-    </head>
+    <link rel="icon" href="/favicon-light.ico" media="(prefers-color-scheme: light)">
+    <link rel="icon" href="/favicon-dark.ico" media="(prefers-color-scheme: dark)">
 
-    <body class="body-container">
-        <div class="meter-container">
-            <h1>Masa Meter</h1>
-            <h1 class="meter"></h1>
-            <div class="links">
-                <a href="/html/history.html" class="button">history</a>
-                <a href="/html/leaderboard.html" class="button">leaderboard</a>
-            </div>
-        </div>
-                
-        <script src="/static/js/meter.js"></script>
-    </body>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100..700;1,100..700&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+    <title>Masa Meter</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>

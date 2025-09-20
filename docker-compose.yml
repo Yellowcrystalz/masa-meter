@@ -6,7 +6,7 @@ services:
     container_name: masa_meter
     image: masa_meter:beta
     ports:
-      - "8080:8080"
+      - "8000:8000"
     restart: always
     volumes:
       - ./data:/app/data

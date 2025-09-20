@@ -28,7 +28,10 @@ Masa meter, retrieving meter counts, fetching history, and generating a
 leaderboard.
 """
 
-from sqlalchemy import Select, Result, func, select
+from datetime import datetime, timedelta, timezone
+from typing import Tuple
+
+from sqlalchemy import Select, Subquery, Result, func, select
 from sqlalchemy.orm import Session
 
 from db.models import Speaker, MasaMention
@@ -192,12 +195,103 @@ def get_leaderboard(session: Session) -> Result:
     """
 
     stmt: Select = (
-        select(Speaker.username, func.count(MasaMention.id))
-        .join(MasaMention, Speaker.username == MasaMention.speaker_username)
-        .group_by(Speaker.username)
+        select(MasaMention.speaker_username, func.count(MasaMention.id))
+        .group_by(MasaMention.speaker_username)
         .order_by(func.count(MasaMention.id).desc())
     )
 
     results: Result = session.execute(stmt)
 
     return results
+
+
+def _get_birthday() -> Tuple[datetime, datetime]:
+    """
+    """
+    
+    birthday_str: str = "-09-14T05:00:00+00:00"
+    current_date: datetime = datetime.now(timezone.utc)
+    current_year: int = current_date.year
+    birthday_str = str(current_year) + birthday_str
+    birthday_date: datetime = datetime.fromisoformat(birthday_str)
+
+    if current_date > birthday_date:
+        birthday_date = str(current_year - 1) + birthday_str
+
+    end_date = str(current_year + 1) + birthday_str
+
+    return birthday_date, end_date
+
+
+def get_achievements(session: Session) -> list[str]:
+    """
+    """
+
+    achievements_list: list[str] = []
+
+    # Masa Master: Who said it the most
+
+    stmt: Select = (
+        select(MasaMention.speaker_username)
+        .group_by(MasaMention.speaker_username)
+        .order_by(func.count(MasaMention.id).desc())
+        .limit(1)
+    )
+    achievements_list.append(session.scalar(stmt))
+
+    # Silent Sashimi: Who said it the least
+
+    stmt = (
+        select(MasaMention.speaker_username)
+        .group_by(MasaMention.speaker_username)
+        .order_by(func.count(MasaMention.id).asc())
+        .limit(1)
+    )
+    achievements_list.append(session.scalar(stmt))
+
+    # Tempura Titan: Who said it the most in one day
+
+    subq: Subquery = (
+        select(
+            MasaMention.speaker_username,
+            MasaMention.date, func.count(MasaMention.date).label("masa_count")
+        )
+        .group_by(MasaMention.speaker_username, func.date(MasaMention.date))
+        .subquery()
+    )
+
+    stmt = (
+        select(subq.c.speaker_username)
+        .group_by(subq.c.speaker_username)
+        .order_by(func.max(subq.c.masa_count).desc())
+        .limit(1)
+    )
+
+    achievements_list.append(session.scalar(stmt))
+
+    # Nigiri Ninja: Who is the only one to say it on a day
+
+    stmt = (
+        select(MasaMention.speaker_username)
+        .group_by(func.date(MasaMention.date))
+        .having(1 == func.count(MasaMention.date))
+        .order_by(func.count(MasaMention.date).desc())
+        .limit(1)
+    )
+    achievements_list.append(session.scalar(stmt))
+
+    # Special Sushi: Who said it on my birthday
+
+    birthday_dates: Tuple[datetime, datetime] = _get_birthday()
+
+    stmt = (
+        select(MasaMention.speaker_username)
+        .where(
+            (MasaMention.date >= birthday_dates[0]) &
+            (MasaMention.date < birthday_dates[1])
+        )
+        .limit(1)
+    )
+    achievements_list.append(session.scalar(stmt))
+
+    return achievements_list
