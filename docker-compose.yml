@@ -4,10 +4,10 @@ services:
       context: .
       dockerfile: api/Dockerfile
     container_name: api
-    image: api:beta
+    image: api:latest
     ports:
-      - "8000:8000"
-    restart: always
+      - "8000"
+    restart: unless-stopped
     volumes:
       - ./data:/app/data
   
@@ -16,27 +16,28 @@ services:
       context: .
       dockerfile: bot/Dockerfile
     container_name: bot
-    image: bot:beta
-    restart: always
+    image: bot:latest
+    restart: unless-stopped
     volumes:
       - ./data:/app/data
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: frontend:latest
+    container_name: frontend
+    depends_on:
+      - api
+    ports:
+      - "80"
+    restart: unless-stopped
 
   cloudflared:
     image: cloudflare/cloudflared:latest
     command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
     container_name: cloudflared
     depends_on:
-      - frontend
-    restart: always
-
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    image: frontend:beta
-    container_name: frontend
-    depends_on:
       - api
-    ports:
-      - "80:80"
-    restart: always
+      - frontend
+    restart: unless-stopped
